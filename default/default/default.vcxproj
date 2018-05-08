@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -28,26 +28,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -112,7 +112,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glfw;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glew;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\glm;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,7 +150,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glfw;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glew;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\glm;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,6 +162,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bstrlib.c" />
+    <ClCompile Include="glslprogram.cpp" />
+    <ClCompile Include="glsw.c" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btAxisSweep3.cpp" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btBroadphaseProxy.cpp" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btCollisionAlgorithm.cpp" />
@@ -306,8 +309,23 @@
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\LinearMath\btVector3.cpp" />
     <ClCompile Include="include\tiny_object_loader\tiny_obj_loader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PT3.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="tiny_mesh.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="tiny_obj_loader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="vertexbufferobject.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\bstrlib.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletCollisionCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletDynamicsCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btAxisSweep3.h" />
@@ -529,6 +547,8 @@
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btTransform.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btTransformUtil.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btVector3.h" />
+    <ClInclude Include="include\glslprogram.h" />
+    <ClInclude Include="include\glsw.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\eglew.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\glew.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\glxew.h" />
@@ -537,11 +557,30 @@
     <ClInclude Include="include\gl\glfw\glfw-3.2.1.bin.WIN32\include\GLFW\glfw3native.h" />
     <ClInclude Include="include\gl\glfw\glfw-3.2.1.bin.WIN64\include\GLFW\glfw3.h" />
     <ClInclude Include="include\gl\glfw\glfw-3.2.1.bin.WIN64\include\GLFW\glfw3native.h" />
+    <ClInclude Include="include\imconfig.h" />
+    <ClInclude Include="include\imgui.h" />
+    <ClInclude Include="include\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="include\imgui_internal.h" />
+    <ClInclude Include="include\imgui_orient.h" />
+    <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
     <ClInclude Include="include\stb_image\stb_image_resize.h" />
     <ClInclude Include="include\stb_image\stb_image_write.h" />
     <ClInclude Include="include\stb_image\stb_perlin.h" />
+    <ClInclude Include="include\stb_image_resize.h" />
+    <ClInclude Include="include\stb_image_write.h" />
+    <ClInclude Include="include\stb_perlin.h" />
+    <ClInclude Include="include\stb_rect_pack.h" />
+    <ClInclude Include="include\stb_textedit.h" />
+    <ClInclude Include="include\stb_truetype.h" />
     <ClInclude Include="include\tiny_object_loader\tiny_obj_loader.h" />
+    <ClInclude Include="include\utils.h" />
+    <ClInclude Include="include\vertexbufferobject.h" />
+    <ClInclude Include="include\World.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="box.frag" />
+    <None Include="box.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
