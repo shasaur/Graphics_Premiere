@@ -1,14 +1,15 @@
 #include "entity.h"
 
-Entity::Entity(Shape shape) {
+Entity::Entity(Shape sh) {
 	position = glm::vec3(0.f, 0.f, 0.f);
 	size = glm::vec3(1.f, 1.f, 1.f);
 	angle = glm::vec3(1.f, 1.f, 1.f);
+	shape = sh;
 
 	wiremesh = false;
 	textured = false;
 
-	switch (shape) {
+	switch (sh) {
 	case Shape::Cone:
 	{break; };
 	case Shape::Cube:
@@ -21,16 +22,17 @@ Entity::Entity(Shape shape) {
 	}
 }
 
-Entity::Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, glm::vec3 colour) {
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, glm::vec3 colour) {
 	position = p;
 	size = s;
 	angle = a;
 	shape_colour = colour;
+	shape = sh;
 
 	wiremesh = w;
 	textured = false;
 
-	switch (shape) {
+	switch (sh) {
 	case Shape::Cone:{
 		CreateCone(glm::vec3(0.f, 0.f, 0.f), 2.f, { 0.f, 0.f, 1.f });
 		break; };
@@ -73,7 +75,9 @@ Entity::Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool
 	}
 }
 
-
+void Entity::SetVelocity(btVector3 newVel) {
+	vel = newVel;
+}
 
 glm::vec2 getPolar(glm::vec3 v)
 {

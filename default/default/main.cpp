@@ -1,134 +1,5 @@
 ﻿#include "main.h"
 
-// BULLET PHYSICS //
-const double PIo2 = PI / 2.;
-const double PIo4 = PI / 4.;
-const double PI2 = PI * 2.;
-const float lod = PI / 32.;
-
-btBroadphaseInterface* broadphase;
-btDefaultCollisionConfiguration* collisionConfiguration;
-btCollisionDispatcher* dispatcher;
-btSequentialImpulseConstraintSolver* solver;
-btDiscreteDynamicsWorld* dynamicsWorld;
-
-std::vector<btRigidBody*> MovingBits; // so that can get at all bits
-std::vector<btRigidBody*> StaticBits; // especially during clean up.
-
-
-									  // BULLET PHYSICS START //
-
-btRigidBody* SetSphere(float size, btTransform T, btVector3 velocity) {
-	btCollisionShape* fallshape = new btSphereShape(size);
-	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
-	btScalar mass = 1;
-	btVector3 fallInertia(0, 0, 0);
-	fallshape->calculateLocalInertia(mass, fallInertia);
-	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
-	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(velocity);
-	fallRigidBody->setRestitution(COE);
-	fallRigidBody->setFriction(0.0f);
-	fallRigidBody->setRollingFriction(0.0f);
-	fallRigidBody->setDamping(0.0f, 0.0f);
-	dynamicsWorld->addRigidBody(fallRigidBody);
-
-	return fallRigidBody;
-}
-
-btRigidBody* SetCube(float size, btTransform T, btVector3 velocity) {
-	btCollisionShape* fallshape = new btBoxShape(btVector3(size, size, size));
-	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
-	btScalar mass = 1;
-	btVector3 fallInertia(0, 0, 0);
-	fallshape->calculateLocalInertia(mass, fallInertia);
-	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
-	btRigidBody* fallRigidBody = new btRigidBody(fallRigidBodyCI);
-	fallRigidBody->setLinearVelocity(velocity);
-	fallRigidBody->setRestitution(COE);
-	fallRigidBody->setFriction(0.0f);
-	fallRigidBody->setRollingFriction(0.0f);
-	fallRigidBody->setDamping(0.0f, 0.0f);
-	dynamicsWorld->addRigidBody(fallRigidBody);
-
-	return fallRigidBody;
-}
-
-void setWall(btDiscreteDynamicsWorld* world, btVector3 side, double distanceFromCenter) {
-	btCollisionShape* shape = new btStaticPlaneShape(side, 0);
-	btDefaultMotionState* motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1),
-		btVector3(side.getX()*distanceFromCenter*-1, side.getY()*distanceFromCenter*-1, side.getZ()*distanceFromCenter*-1)));
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0, motionState, shape, btVector3(0, 0, 0));
-	btRigidBody* rigidBody = new btRigidBody(rigidBodyCI);
-	rigidBody->setRestitution(COE);
-	world->addRigidBody(rigidBody);
-}
-
-void bullet_init() {
-	/*
-	* set up world
-	*/
-	broadphase = new btDbvtBroadphase();
-	collisionConfiguration = new btDefaultCollisionConfiguration();
-	dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	solver = new btSequentialImpulseConstraintSolver;
-	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0., GRAVITY, 0));
-
-	double box_size = 3;
-
-	setWall(dynamicsWorld, btVector3(0, 1, 0), box_size);
-	setWall(dynamicsWorld, btVector3(1, 0, 0), box_size);
-	setWall(dynamicsWorld, btVector3(-1, 0, 0), box_size);
-	setWall(dynamicsWorld, btVector3(0, -1, 0), box_size);
-	setWall(dynamicsWorld, btVector3(0, 0, 1), box_size);
-	setWall(dynamicsWorld, btVector3(0, 0, -1), box_size);
-
-	printf("Setup Bullet ");
-	int n = MovingBits.size();
-	printf("%d", n);
-}
-void bullet_step(int i, Scene* scene) {
-	btTransform trans;
-	btRigidBody* moveRigidBody;
-	int n = MovingBits.size();
-	moveRigidBody = MovingBits[i];
-	moveRigidBody->getMotionState()->getWorldTransform(trans);
-
-	//printf("%f, %f, %f\n", position.x, position.y, position.z);
-	glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-	//btVector3 a = moveRigidBody->getAngularFactor();
-
-	btQuaternion a = moveRigidBody->getCenterOfMassTransform().getRotation();
-	glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-	float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
-
-	printf("%f, %f, %f\n", an.x, an.y, 0);
-	//glm::mat4 btMat = glm::mat4(trans)
-	//btMat.getRotation(trans.getRotation())
-
-	scene->UpdateEntityPosition(i, position);
-	scene->UpdateEntityAngle(i, an, theta);
-}
-void bullet_close() {
-	/*
-	* This is very minimal and relies on OS to tidy up.
-	*/
-	btRigidBody* moveRigidBody;
-	moveRigidBody = MovingBits[0];
-	dynamicsWorld->removeRigidBody(moveRigidBody);
-	delete moveRigidBody->getMotionState();
-	delete moveRigidBody;
-	delete dynamicsWorld;
-	delete solver;
-	delete collisionConfiguration;
-	delete dispatcher;
-	delete broadphase;
-}
-
-// BULLET PHYSICS END //
-
-
 int renderMode = 1;
 bool pause = false;
 
@@ -231,37 +102,42 @@ float rnd(float limit, float offset) {
 
 void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 pos, glm::dvec3 velocity);
 
-void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size) {
-	AddPhysicalObject(scene, shape, size,
-		glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)),
-		glm::vec3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-}
+//void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size) {
+//	AddPhysicalObject(scene, shape, size,
+//		glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)),
+//		glm::vec3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+//}
 
-void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 pos, glm::dvec3 velocity) {
-	//Entity e1(Entity::Sphere, glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.f, 0.f, 0.f), 40, true);
-	Entity e1(shape, pos, glm::vec3(size, size, size), glm::vec3(0.f, 0.f, 0.f), 40, false);
-	scene.AddEntity(e1);
-
-	if (shape == Entity::Sphere)
-		MovingBits.push_back(SetSphere(size, btTransform(btQuaternion(0, 0, 0, 1), btVector3(pos.x, pos.y, pos.z)),
-			btVector3(velocity.x, velocity.y, velocity.z)));
-	else
-		MovingBits.push_back(SetCube(size, btTransform(btQuaternion(0, 0, 0, 1), btVector3(pos.x, pos.y, pos.z)),
-			btVector3(velocity.x, velocity.y, velocity.z)));
-}
+//void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 pos, glm::dvec3 velocity) {
+//	//Entity e1(Entity::Sphere, glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.f, 0.f, 0.f), 40, true);
+//	
+//
+//	
+//}
 
 void SetupScenes() {
 	scenes[0] = new Scene();
 	scenes[1] = new Scene(glm::vec3(0.f, 0.f, -15.f));
 
-	Entity e1(Entity::Cube, glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.f, 0.f, 0.f), 40, true);
-	scenes[0]->AddEntity(e1);
+	//Entity e1(Entity::Cube, glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.f, 0.f, 0.f), 40, true);
+	//scenes[0]->AddEntity(e1);
 
-	for (int i = 0; i<2; i++)
-		AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f);
+	//AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f);
+	Entity e2(Entity::Cube, glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	scenes[1]->AddEntity(e2);
 
-	for (int i = 0; i<3; i++)
-		AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f);
+	Entity e3(Entity::Sphere, glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	e3.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	scenes[1]->AddEntity(e3);
+
+	Entity e4(Entity::Sphere, glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	e4.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	scenes[1]->AddEntity(e4);
+
+	//for (int i = 0; i < 3; i++) {
+	//	AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f);
+	//}
 
 	// AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f, glm::vec3(0,-6,-16), glm::dvec3(3,2,0));
 	// AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f, glm::vec3(0,-3,9), glm::dvec3(3,2,0));
@@ -337,9 +213,6 @@ void SetupShaders(void) {
 }
 
 void Render() {
-	dynamicsWorld->stepSimulation(1 / 60.f, 20);
-	for (int i = 0; i<MovingBits.size(); i++)
-		bullet_step(i, scenes[1]);
 	scenes[1]->Render(s2program, vao);
 }
 
@@ -395,10 +268,6 @@ int main() {
 	glfwSetKeyCallback(window, key_callback);
 	fprintf(stderr, "GL INFO %s\n", glGetString(GL_VERSION));
 
-
-	bullet_init();  	// set up physics
-
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 	//glDepthMask(GL_FALSE);
@@ -422,7 +291,11 @@ int main() {
 	//scenes[2]->Rotate(glm::vec3(0.01f, 0.f, 0.f));
 
 	while (!glfwWindowShouldClose(window)) {  // Main loop
+
+		// Update scene
 		scenes[current_scene]->Update(current_scene);
+
+		// Render scene
 		Render();        // OpenGL rendering goes here...
 		glfwSwapBuffers(window);        // Swap front and back rendering buffers
 		glfwPollEvents();         // Poll for events.

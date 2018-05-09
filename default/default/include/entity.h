@@ -45,6 +45,7 @@ public:
 
 	glm::dvec3 position;
 	glm::vec3 size;
+	btVector3 vel;
 
 	glm::vec3 angle;
 	float theta;
@@ -52,6 +53,8 @@ public:
 	glm::vec3 shape_colour;
 
 	bool wiremesh, textured;
+
+	Shape shape;
 
 	std::vector<Vertex> v;
 
@@ -71,7 +74,7 @@ public:
 	glm::mat4 model_transform();
 
 
-
+	void Entity::SetVelocity(btVector3 vel);
 	void MoveModel(glm::dvec3 p);
 };
 

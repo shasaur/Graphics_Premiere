@@ -28,6 +28,23 @@ class Scene {
 	glm::vec3 cameraPosition;
 	glm::vec3 background;
 
+	int frame;
+
+	// Bullet physics
+	const double PI = 3.141592653589793;
+	const double PIo2 = PI / 2.;
+	const double PIo4 = PI / 4.;
+	const double PI2 = PI * 2.;
+	const float lod = PI / 32.;
+
+	btBroadphaseInterface* broadphase;
+	btDefaultCollisionConfiguration* collisionConfiguration;
+	btCollisionDispatcher* dispatcher;
+	btSequentialImpulseConstraintSolver* solver;
+	btDiscreteDynamicsWorld* dynamicsWorld;
+
+	std::vector<btRigidBody*> MovingBits; // so that can get at all bits
+	std::vector<btRigidBody*> StaticBits; // especially during clean up.
 
 public:
 	std::vector<Vertex> v;
@@ -53,6 +70,15 @@ public:
 	void Update(GLint screenID);
 	void Render(GLuint shaderprogram, GLuint vao);
 	void DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 View, Entity& e);
+
+	// Bullet
+	void Scene::SetupPhysics();
+	void Scene::UpdatePhysics();
+	void Scene::DestructPhysics();
+
+	btRigidBody* Scene::SetSphere(float size, btTransform T, btVector3 velocity);
+	btRigidBody* Scene::SetCube(float size, btTransform T, btVector3 velocity);
+	void Scene::setWall(btDiscreteDynamicsWorld* world, btVector3 side, double distanceFromCenter);
 };
 
 #endif /* SCENE_H */
