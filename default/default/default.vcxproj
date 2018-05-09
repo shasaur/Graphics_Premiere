@@ -112,7 +112,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glfw;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glew;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\glm;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glfw;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glew;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\glm;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,7 +150,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glfw;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glew;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\glm;include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glfw;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\gl\glew;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include\glm;C:\Users\shasa\Documents\GitHub\Graphics_Premiere\default\default\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +163,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bstrlib.c" />
+    <ClCompile Include="entity.cpp" />
+    <ClCompile Include="EntityGroup.cpp" />
     <ClCompile Include="glslprogram.cpp" />
     <ClCompile Include="glsw.c" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btAxisSweep3.cpp" />
@@ -313,6 +315,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="scene.cpp" />
     <ClCompile Include="tiny_mesh.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -322,6 +325,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="vertexbufferobject.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -547,6 +551,8 @@
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btTransform.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btTransformUtil.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btVector3.h" />
+    <ClInclude Include="include\entity.h" />
+    <ClInclude Include="include\entitygroup.h" />
     <ClInclude Include="include\glslprogram.h" />
     <ClInclude Include="include\glsw.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\eglew.h" />
@@ -562,6 +568,8 @@
     <ClInclude Include="include\imgui_impl_glfw_gl3.h" />
     <ClInclude Include="include\imgui_internal.h" />
     <ClInclude Include="include\imgui_orient.h" />
+    <ClInclude Include="include\main.h" />
+    <ClInclude Include="include\scene.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
     <ClInclude Include="include\stb_image\stb_image_resize.h" />
@@ -575,6 +583,7 @@
     <ClInclude Include="include\stb_truetype.h" />
     <ClInclude Include="include\tiny_object_loader\tiny_obj_loader.h" />
     <ClInclude Include="include\utils.h" />
+    <ClInclude Include="include\Vertex.h" />
     <ClInclude Include="include\vertexbufferobject.h" />
     <ClInclude Include="include\World.h" />
   </ItemGroup>
