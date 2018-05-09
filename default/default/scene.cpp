@@ -2,8 +2,8 @@
 
 Scene::Scene() {
 	background = glm::vec3(0.f, 0.f, 0.f);
-	cameraPosition = glm::vec3(0.f, 0.f, -5.0f);
-	cameraRotation = glm::vec3(0.f, 0.f, 0.f);
+	cameraPosition = glm::vec3(0.f, 0.f, -20.0f);
+	cameraRotation = glm::vec3(0.f, 0.0f, 0.f);
 	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
 	cameraSpeed = 0.f;
 
@@ -13,17 +13,17 @@ Scene::Scene() {
 	SetupPhysics();  	// set up physics
 }
 
-Scene::Scene(glm::vec3 cam) {
-	background = glm::vec3(0.f, 0.f, 0.f);
-	cameraPosition = cam;
-	cameraRotation = glm::vec3(0.f, 0.f, 0.f);
-	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
-
-	groups = std::vector<EntityGroup>();
-
-	frame = 0; 
-	SetupPhysics();  	// set up physics
-}
+//Scene::Scene(glm::vec3 cam) {
+//	background = glm::vec3(0.f, 0.f, 0.f);
+//	cameraPosition = cam;
+//	cameraRotation = glm::vec3(0.f, 0.02f, 0.f);
+//	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
+//
+//	groups = std::vector<EntityGroup>();
+//
+//	frame = 0; 
+//	SetupPhysics();  	// set up physics
+//}
 
 void Scene::SetBackground(glm::vec3 b) {
 	background = b;
@@ -56,14 +56,7 @@ void Scene::AddGroups(EntityGroup* e, int n) {
 	}
 }
 
-void Scene::UpdateEntityPosition(int index, glm::dvec3 pos){
-	en.at(index).position = pos;
-}
 
-void Scene::UpdateEntityAngle(int index, glm::vec3 ang, float theta){
-	en.at(index).angle = ang;
-	en.at(index).theta = theta;
-}
 
 void Scene::FreeGeometry() {
 	for (int g = 0; g < groups.size(); g++) {
@@ -134,10 +127,12 @@ void Scene::UpdatePhysics() {
 		//glm::mat4 btMat = glm::mat4(trans)
 		//btMat.getRotation(trans.getRotation())
 
-		UpdateEntityPosition(i, position);
-		UpdateEntityAngle(i, an, theta);
+		en.at(i).position = position;
+		en.at(i).angle = an;
+		en.at(i).theta = theta;
 	}
 }
+
 void Scene::DestructPhysics() {
 	/*
 	* This is very minimal and relies on OS to tidy up.
@@ -212,7 +207,7 @@ void Scene::setWall(btDiscreteDynamicsWorld* world, btVector3 side, double dista
 
 void Scene::Update(GLint screenID) {
 	// Update physics
-	dynamicsWorld->stepSimulation(1 / 60.f, 20);
+	dynamicsWorld->stepSimulation(1 / 120.f, 20);
 
 	UpdatePhysics();
 
@@ -230,7 +225,16 @@ void Scene::Update(GLint screenID) {
 	//	}
 	//}
 
-	//if 
+	//if (frame % 600 <= 300) {
+	//	cameraPosition = glm::vec3(0.f, 0.f, -10.0f);
+	//	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
+	//} else {
+		cameraPosition = glm::vec3(-10.f, 0.f, 0.0f);
+		cameraAngle = glm::vec3(0.f, -PI/2, 0.f);
+	//}
+
+	//cameraPosition.z += 0.02;
+	//cameraAngle.z += 0.01;
 
 	for (int i = 0; i < groups.size(); i++) {
 		groups.at(i).Animate();
@@ -280,16 +284,25 @@ void Scene::Render(GLuint shaderprogram, GLuint vao) {
 	GLfloat p = 400.f;
 	t = fmod(t, p);
 	angle = t * 360.f / p;
-	glm::mat4 View = glm::mat4(1.f);
+	//glm::mat4 View = glm::mat4(1.f);
 
 	cameraAngle[0] += cameraRotation.x;
 	cameraAngle[1] += cameraRotation.y;
 	cameraAngle[2] += cameraRotation.z;
 
-	View = glm::translate(View, cameraPosition);
-	View = glm::rotate(View, cameraAngle.x, glm::vec3(1.f, 0.f, 0.f));
-	View = glm::rotate(View, cameraAngle.y, glm::vec3(0.f, 1.f, 0.f));
-	View = glm::rotate(View, cameraAngle.z, glm::vec3(0.f, 0.f, 1.f));
+	//View = glm::translate(View, cameraPosition);
+	//View = glm::rotate(View, cameraAngle.x, glm::vec3(1.f, 0.f, 0.f));
+	//View = glm::rotate(View, cameraAngle.y, glm::vec3(0.f, 1.f, 0.f));
+	//View = glm::rotate(View, cameraAngle.z, glm::vec3(0.f, 0.f, 1.f));
+
+
+	glm::mat4 r = glm::mat4(1.f);
+	r = glm::rotate(r, cameraAngle.x, glm::vec3(1, 0, 0));
+	r = glm::rotate(r, cameraAngle.y, glm::vec3(0, 1, 0));
+	r = glm::rotate(r, cameraAngle.z, glm::vec3(0, 0, 1));
+
+	glm::mat4 View = r * glm::translate(glm::mat4(1.), cameraPosition);// *r;
+
 
 	/* Bind our modelmatrix variable to be a uniform called mvpmatrix in our shaderprogram */
 	glClearColor(background.r, background.g, background.b, 1.0f);  /* Make our background black */

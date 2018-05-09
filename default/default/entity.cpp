@@ -365,13 +365,11 @@ void Entity::CreateCone(glm::vec3 c, GLfloat height, glm::vec3 n) {
 }
 
 glm::mat4 Entity::angle_matrix() {
-	glm::mat4 t = glm::mat4(1.f);
-	
-	t = glm::rotate(t, angle.x, glm::vec3(1, 0, 0));
-	t = glm::rotate(t, angle.z, glm::vec3(0, 1, 0));
-	t = glm::rotate(t, angle.y, glm::vec3(0, 0, 1));
-
-	return t;
+	glm::mat4 r = glm::mat4(1.f);
+	r = glm::rotate(r, angle.x, glm::vec3(1, 0, 0));
+	r = glm::rotate(r, angle.y, glm::vec3(0, 1, 0));
+	r = glm::rotate(r, angle.z, glm::vec3(0, 0, 1));
+	return r;
 }
 
 glm::mat4 Entity::model_transform() {

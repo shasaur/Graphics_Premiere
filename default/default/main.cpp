@@ -117,21 +117,21 @@ void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 
 
 void SetupScenes() {
 	scenes[0] = new Scene();
-	scenes[1] = new Scene(glm::vec3(0.f, 0.f, -15.f));
+	scenes[1] = new Scene();//glm::vec3(0.f, 0.f, -15.f));
 
 	//Entity e1(Entity::Cube, glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.f, 0.f, 0.f), 40, true);
 	//scenes[0]->AddEntity(e1);
 
 	//AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f);
-	Entity e2(Entity::Cube, glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	Entity e2(Entity::Cube, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
 	e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	scenes[1]->AddEntity(e2);
 
-	Entity e3(Entity::Sphere, glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	Entity e3(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
 	e3.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	scenes[1]->AddEntity(e3);
 
-	Entity e4(Entity::Sphere, glm::vec3(rnd(20, 10), rnd(20, 10), rnd(20, 10)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	Entity e4(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
 	e4.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	scenes[1]->AddEntity(e4);
 

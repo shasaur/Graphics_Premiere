@@ -61,9 +61,6 @@ public:
 	void AddEntity(Entity e);
 	void AddEntities(Entity* e, int n);
 	void AddGroups(EntityGroup* e, int n);
-
-	void UpdateEntityPosition(int index, glm::dvec3 pos);
-	void UpdateEntityAngle(int index, glm::vec3 ang, float theta);
 	
 	void SetBackground(glm::vec3 background);
 
