@@ -1,6 +1,7 @@
 #ifndef MAIN_H_INCLUDED
 #define MAIN_H_INCLUDED
 
+#include <iostream>
 #include <stdio.h>
 
 
@@ -46,25 +47,23 @@
 #include <tiny_obj_loader.h>
 
 // stb_image
-//#define STB_IMAGE_IMPLEMENTATION // only define in one file
-//#include <stb_image.h>
+#define STB_IMAGE_IMPLEMENTATION // only define in one file
+#include <stb_image.h>
 
-
-////////////////////////////////////////////////////
-// TOMS STUFF //
-
+// properties
 #include "World.h"
-
 const double PI = 3.141592653589793;
-const double PIo2 = PI / 2.;
-const double PIo4 = PI / 4.;
-const double PI2 = PI * 2.;
-const float lod = PI / 32.;
 
+// other
 #include "glslprogram.h"
-//#include "stb_image.h"
 #include "utils.h"
 
-///////////////////////////////////////////////////
+// My base classes
+#include "Vertex.h"
+#include "entity.h"
+#include "scene.h"
+#include "entitygroup.h"
+//#include "stb_image.h"
+
 
 #endif // MAIN_H_INCLUDED
