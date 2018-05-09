@@ -1,3 +1,6 @@
+#define SCREEN_WIDTH 1360
+#define SCREEN_HEIGHT 720
+
 /*
  * simulation parameters
 */

@@ -123,17 +123,17 @@ void SetupScenes() {
 	//scenes[0]->AddEntity(e1);
 
 	//AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f);
-	Entity e2(Entity::Cube, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
-	e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, false);
+	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	scenes[1]->AddEntity(e2);
 
-	Entity e3(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
-	e3.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-	scenes[1]->AddEntity(e3);
+	//Entity e3(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	//e3.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	//scenes[1]->AddEntity(e3);
 
-	Entity e4(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
-	e4.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-	scenes[1]->AddEntity(e4);
+	//Entity e4(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
+	//e4.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	//scenes[1]->AddEntity(e4);
 
 	//for (int i = 0; i < 3; i++) {
 	//	AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f);
@@ -231,15 +231,13 @@ void init() {
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 }
 
-const GLint WIDTH = 600, HEIGHT = 600;
-
 int main() {
 	int k = 0;
 
 	init();
 
 
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "COMP3214 Coursework Physics", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "COMP3214 Coursework Physics", nullptr, nullptr);
 
 	int screenWidth, screenHeight;
 	glfwGetFramebufferSize(window, &screenWidth, &screenHeight);

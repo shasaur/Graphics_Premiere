@@ -95,12 +95,12 @@ void Scene::SetupPhysics() {
 
 	double box_size = 3;
 
-	setWall(dynamicsWorld, btVector3(0, 1, 0), box_size);
-	setWall(dynamicsWorld, btVector3(1, 0, 0), box_size);
-	setWall(dynamicsWorld, btVector3(-1, 0, 0), box_size);
-	setWall(dynamicsWorld, btVector3(0, -1, 0), box_size);
-	setWall(dynamicsWorld, btVector3(0, 0, 1), box_size);
-	setWall(dynamicsWorld, btVector3(0, 0, -1), box_size);
+	//setWall(dynamicsWorld, btVector3(0, 1, 0), box_size);
+	//setWall(dynamicsWorld, btVector3(1, 0, 0), box_size);
+	//setWall(dynamicsWorld, btVector3(-1, 0, 0), box_size);
+	//setWall(dynamicsWorld, btVector3(0, -1, 0), box_size);
+	//setWall(dynamicsWorld, btVector3(0, 0, 1), box_size);
+	//setWall(dynamicsWorld, btVector3(0, 0, -1), box_size);
 
 	printf("Setup Bullet ");
 	int n = MovingBits.size();
@@ -229,12 +229,12 @@ void Scene::Update(GLint screenID) {
 	//	cameraPosition = glm::vec3(0.f, 0.f, -10.0f);
 	//	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
 	//} else {
-		cameraPosition = glm::vec3(-10.f, 0.f, 0.0f);
-		cameraAngle = glm::vec3(0.f, -PI/2, 0.f);
+		//cameraPosition = glm::vec3(-10.f, 0.f, 0.0f);
+		//cameraAngle = glm::vec3(0.f, -PI/2, 0.f);
 	//}
 
 	//cameraPosition.z += 0.02;
-	//cameraAngle.z += 0.01;
+	//cameraAngle.y -= 0.001;
 
 	for (int i = 0; i < groups.size(); i++) {
 		groups.at(i).Animate();
@@ -279,7 +279,7 @@ void Scene::DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 Vie
 
 void Scene::Render(GLuint shaderprogram, GLuint vao) {
 	GLfloat angle;
-	glm::mat4 Projection = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
 	GLfloat t = glfwGetTime();
 	GLfloat p = 400.f;
 	t = fmod(t, p);
@@ -301,7 +301,7 @@ void Scene::Render(GLuint shaderprogram, GLuint vao) {
 	r = glm::rotate(r, cameraAngle.y, glm::vec3(0, 1, 0));
 	r = glm::rotate(r, cameraAngle.z, glm::vec3(0, 0, 1));
 
-	glm::mat4 View = r * glm::translate(glm::mat4(1.), cameraPosition);// *r;
+	glm::mat4 View = glm::translate(glm::mat4(1.), cameraPosition) * r;// *r;
 
 
 	/* Bind our modelmatrix variable to be a uniform called mvpmatrix in our shaderprogram */
