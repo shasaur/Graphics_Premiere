@@ -22,6 +22,22 @@ Entity::Entity(Shape sh) {
 	}
 }
 
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<glm::vec3> vertices) {
+	position = p;
+	size = s;
+	angle = a;
+
+	for (int i = 0; i < vertices.size(); i++) {
+		Vertex vert;
+		
+		setPosition(vert, vertices.at(i).x, vertices.at(i).y, vertices.at(i).z); //vertex: width x height x length (set to 0.0 for a circle (flat), >= 1.0 for a cone)
+		setNormal(vert, vert.position[0], vert.position[1], vert.position[2]);
+		setColour(vert, glm::vec3(1.f, 1.f, 1.f));
+
+		push(vert);
+	}
+}
+
 Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, glm::vec3 colour) {
 	position = p;
 	size = s;
@@ -116,13 +132,17 @@ void Entity::SetupGeometry() {
 	glVertexAttribPointer((GLuint)2, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), (const GLvoid*)offsetof(struct Vertex, normal));   // bug );
 	glEnableVertexAttribArray(2);
 
-	// angle data to fix the light after the object has been rotated, so that it diffuses the right way
-	glVertexAttribPointer((GLuint)3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), (const GLvoid*)offsetof(struct Vertex, uv));   // bug );
-	glEnableVertexAttribArray(3);
 
 	if (textured) {
-		glVertexAttribPointer((GLuint)4, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), (const GLvoid*)offsetof(struct Vertex, uv));
-		glEnableVertexAttribArray(4);
+		//glActiveTexture(GL_TEXTURE0 + texID);
+		//glBindTexture(GL_TEXTURE_2D, texID);
+
+		// angle data to fix the light after the object has been rotated, so that it diffuses the right way
+		glVertexAttribPointer((GLuint)3, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), (const GLvoid*)offsetof(struct Vertex, uv));   // bug );
+		glEnableVertexAttribArray(3);
+
+		//glVertexAttribPointer((GLuint)4, 2, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), (const GLvoid*)offsetof(struct Vertex, uv));
+		//glEnableVertexAttribArray(4);
 	}
 
 	glBindVertexArray(0);
@@ -133,6 +153,23 @@ void Entity::SetupGeometry() {
 	by their distance in the lighting calculation. This will therefore make all entities render lights
 	in parallel, much like the light rays potray when coming from infinity. */
 
+//void Entity::CreateModel() {
+//	std::vector<tinyobj::shape_t> shapes;
+//	std::vector<tinyobj::material_t> materials;
+//	std::vector< glm::vec3 > vertices;
+//	std::vector< Vertex > o;
+//
+//	std::string obj_err =
+//		tinyobj::LoadObj(shapes, materials, filename, NULL);
+//
+//	for (int i = 0; i < shapes.size(); i++)
+//		for (int j = 0; j < shapes[i].mesh.indices.size(); j++)
+//			vertices.push_back(glm::vec3(
+//				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3],
+//				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1],
+//				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2]
+//			));
+//}
 	
 void Entity::CreateCube(bool wiremesh){
 	//float d = 0.5f;

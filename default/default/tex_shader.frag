@@ -8,5 +8,6 @@ out vec4 FragColor;
 uniform sampler2D text;
 
 void main(void) {
-    FragColor = texture2D(text,uv_Color) * vec4(ex_Color, 1.f);
+	vec4 ambient_Color = vec4(0.1f, 0.1f, 0.1f, 1.0f);
+    FragColor = ambient_Color + (texture2D(text,uv_Color) * vec4(ex_Color, 1.f));
 }

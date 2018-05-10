@@ -267,6 +267,7 @@ void Scene::DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 Vie
 	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "modelmatrix"), 1, GL_FALSE, glm::value_ptr(Angle));
 
 	if (e.textured) {
+		//printf("Drawing textured image\n");
 		glUniform1i(glGetUniformLocation(shaderprogram, "text"), e.texID);
 		glActiveTexture(GL_TEXTURE0 + e.texID);
 		glBindTexture(GL_TEXTURE_2D, e.texID);
@@ -275,6 +276,11 @@ void Scene::DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 Vie
 	glDrawArrays(mode, 0, e.v.size());
 	/* Invoke glDrawArrays telling that our data consists of a triangle fan */
 	glBindVertexArray(0);
+
+	if (e.textured) {
+		glActiveTexture(GL_TEXTURE0 + e.texID);
+		glBindTexture(GL_TEXTURE_2D, GL_TEXTURE0);
+	}
 }
 
 void Scene::Render(GLuint shaderprogram, GLuint vao) {

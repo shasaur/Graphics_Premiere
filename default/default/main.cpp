@@ -60,7 +60,7 @@ std::vector<Vertex> v;
 Scene* scenes[4];
 int current_scene = 0;
 
-GLuint mars_texture;
+GLuint mars_texture, saturn_texture, titan_texture, no_texture;
 
 ///*
 //Create a simple sphere
@@ -96,11 +96,37 @@ GLuint loadTexture(const char *fname) {
 	return tex;
 }
 
+// loads an image into a gl texture
+GLuint load_texture_blank()
+{
+	int w = 1, h = 1;
+	unsigned char *data = new unsigned char[3 * w * h];
+	for (int i = 0; i < 3 * w*h; ++i)
+		data[i] = 0;
+
+	GLuint tex = 1;
+	glGenTextures(1, &tex);
+	//glBindTexture(GL_TEXTURE_2D, tex);
+	// set the texture wrapping parameters
+	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	delete data;
+	return tex;
+}
+
 float rnd(float limit, float offset) {
 	return ((float)(rand() % 100) / (100.f / limit)) - offset;
 }
 
-void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 pos, glm::dvec3 velocity);
+//void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 pos, glm::dvec3 velocity);
 
 //void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size) {
 //	AddPhysicalObject(scene, shape, size,
@@ -117,33 +143,37 @@ void AddPhysicalObject(Scene &scene, Entity::Shape shape, float size, glm::vec3 
 
 void SetupScenes() {
 	scenes[0] = new Scene();
+
+
 	scenes[1] = new Scene();//glm::vec3(0.f, 0.f, -15.f));
 
-	//Entity e1(Entity::Cube, glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.5f, 1.5f, 1.5f), glm::vec3(0.f, 0.f, 0.f), 40, true);
-	//scenes[0]->AddEntity(e1);
-
-	//AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f);
-	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, false);
+	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, false, saturn_texture, { 1.f, 1.f, 1.f });
 	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	scenes[1]->AddEntity(e2);
 
-	//Entity e3(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
-	//e3.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-	//scenes[1]->AddEntity(e3);
+	Entity e3(Entity::Sphere, glm::vec3(175.f, 50.f, -250.f), glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.f, 0.f, 0.f), 100, false, titan_texture, { 1.f, 1.f, 1.f });
+	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	scenes[1]->AddEntity(e3);
 
-	//Entity e4(Entity::Sphere, glm::vec3(rnd(10, 5), rnd(10, 5), rnd(10, 5)), glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 40, false);
-	//e4.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	//Entity e4(Entity::Sphere, glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.5f, 0.5f, 1.0f });
+	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	//scenes[1]->AddEntity(e4);
 
-	//for (int i = 0; i < 3; i++) {
-	//	AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f);
-	//}
+	//std::vector<tinyobj::shape_t> shapes;
+	//std::vector<tinyobj::material_t> materials;
+	//std::vector< glm::vec3 > vertices;
+	//std::vector< Vertex > o;
 
-	// AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f, glm::vec3(0,-6,-16), glm::dvec3(3,2,0));
-	// AddPhysicalObject(*scenes[1], Entity::Cube, 0.5f, glm::vec3(0,-3,9), glm::dvec3(3,2,0));
-	// AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f, glm::vec3(0,-3,-30), glm::dvec3(-2,4,0));
-	// AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f, glm::vec3(0,-3,9), glm::dvec3(2,-2,2));
-	// AddPhysicalObject(*scenes[1], Entity::Sphere, 0.5f, glm::vec3(0,3,21), glm::dvec3(0,0,0));
+	//std::string obj_err =
+	//	tinyobj::LoadObj(shapes, materials, filename, NULL);
+
+	//for (int i = 0; i < shapes.size(); i++)
+	//	for (int j = 0; j < shapes[i].mesh.indices.size(); j++)
+	//		vertices.push_back(glm::vec3(
+	//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3],
+	//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1],
+	//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2]
+	//		));
 
 	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
 }
@@ -209,11 +239,10 @@ void SetupShaders(void) {
 	s1program = InitialiseShader(filetobuf("./no_light.vert"), filetobuf("./no_light.frag"));
 	s2program = InitialiseShader(filetobuf("./light.vert"), filetobuf("./light.frag"));
 	s3program = InitialiseShader(filetobuf("./tex_shader.vert"), filetobuf("./tex_shader.frag"));
-	glUseProgram(s1program);
 }
 
 void Render() {
-	scenes[1]->Render(s2program, vao);
+	scenes[1]->Render(s3program, vao);
 }
 
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
@@ -270,7 +299,9 @@ int main() {
 	glEnable(GL_TEXTURE_2D);
 	//glDepthMask(GL_FALSE);
 
-	mars_texture = loadTexture("textures/mars.bmp");
+	saturn_texture = loadTexture("textures/saturn.jpg");
+	//mars_texture = loadTexture("textures/mars.jpg");
+	titan_texture = loadTexture("textures/titan.jpg");
 
 	SetupScenes();
 	SetupShaders();
@@ -279,7 +310,7 @@ int main() {
 	scenes[1]->FreeGeometry();
 	scenes[1]->SetupGeometry();
 
-	glUseProgram(s2program);
+	glUseProgram(s3program);
 
 
 	glViewport(0, 0, screenWidth, screenHeight);

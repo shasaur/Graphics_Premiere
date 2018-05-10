@@ -592,6 +592,8 @@
     <None Include="box.vert" />
     <None Include="light.frag" />
     <None Include="light.vert" />
+    <None Include="tex_shader.frag" />
+    <None Include="tex_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

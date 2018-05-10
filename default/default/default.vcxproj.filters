@@ -1288,5 +1288,11 @@
     <None Include="light.vert">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="tex_shader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="tex_shader.vert">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
