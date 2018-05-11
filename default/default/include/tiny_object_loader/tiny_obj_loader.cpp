@@ -459,11 +459,11 @@ std::string LoadMtl(std::map<std::string, int> &material_map,
       // set new mtl name
       char namebuf[4096];
       token += 7;
-#ifdef _MSC_VER
-      sscanf_s(token, "%s", namebuf);
-#else
+//#ifdef _MSC_VER
+//      sscanf_s(token, "%s", namebuf);
+//#else
       sscanf(token, "%s", namebuf);
-#endif
+//#endif
       material.name = namebuf;
       continue;
     }
@@ -750,11 +750,11 @@ std::string LoadObj(std::vector<shape_t> &shapes,
 
       char namebuf[4096];
       token += 7;
-#ifdef _MSC_VER
-      sscanf_s(token, "%s", namebuf);
-#else
+//#ifdef _MSC_VER
+//      sscanf_s(token, "%s", namebuf);
+//#else
       sscanf(token, "%s", namebuf);
-#endif
+//#endif
 
       // Create face group per material.
       bool ret = exportFaceGroupToShape(shape, vertexCache, v, vn, vt,
@@ -777,11 +777,11 @@ std::string LoadObj(std::vector<shape_t> &shapes,
     if ((0 == strncmp(token, "mtllib", 6)) && isSpace((token[6]))) {
       char namebuf[4096];
       token += 7;
-#ifdef _MSC_VER
-      sscanf_s(token, "%s", namebuf);
-#else
+//#ifdef _MSC_VER
+//      sscanf_s(token, "%s", namebuf);
+//#else
       sscanf(token, "%s", namebuf);
-#endif
+//#endif
 
       std::string err_mtl = readMatFn(namebuf, materials, material_map);
       if (!err_mtl.empty()) {
@@ -843,11 +843,11 @@ std::string LoadObj(std::vector<shape_t> &shapes,
       // @todo { multiple object name? }
       char namebuf[4096];
       token += 2;
-#ifdef _MSC_VER
-      sscanf_s(token, "%s", namebuf);
-#else
+//#ifdef _MSC_VER
+//      sscanf_s(token, "%s", namebuf);
+//#else
       sscanf(token, "%s", namebuf);
-#endif
+//#endif
       name = std::string(namebuf);
 
       continue;

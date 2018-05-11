@@ -60,9 +60,12 @@ public:
 
 	// - Functions -
 	Entity(Shape shape);
-	Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<glm::vec3> vertices); // model loading
+	Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vertex> vertices, GLuint textureID);
 	Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool wiremesh, glm::vec3 colour = { -1.f,-1.f,-1.f }); // solid colour entity
 	Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool wiremesh, GLuint textureID, glm::vec3 colour = { -1.f,-1.f,-1.f }); // textured entity
+	Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a,
+		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords,
+		GLuint texture_group); // model loading
 
 	void CreateCube(bool wiremesh);
 	void CreateSimpleSphere(int n, bool wiremesh);

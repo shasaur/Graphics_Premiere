@@ -123,7 +123,7 @@ void Scene::UpdatePhysics() {
 		glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
 		float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
 
-		printf("%f, %f, %f\n", an.x, an.y, 0);
+		//printf("%f, %f, %f\n", an.x, an.y, 0);
 		//glm::mat4 btMat = glm::mat4(trans)
 		//btMat.getRotation(trans.getRotation())
 

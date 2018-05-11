@@ -27,6 +27,66 @@ EntityGroup::EntityGroup(Entity e) {
 	angle = glm::vec3(0.f, 0.f, 0.f);
 }
 
+EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
+	std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords) {
+	
+
+	group_mov = glm::vec3(0.f, 0.f, 0.f);
+	current_ang_mom = glm::vec3(0.f, 0.f, 0.f);
+	total_ang_mom = glm::vec3(0.f, 0.f, 0.f);
+
+	centre = p;
+	angle = a;
+
+	// Animation
+	an_types = std::vector<GLuint>();
+	an_lengths = std::vector<GLuint>();
+	an_ang_mags = std::vector<GLfloat>();
+	an_ang_dirs = std::vector<glm::vec3>();
+
+	mom_angular_magnitude = 0.f;
+	mom_angular_direction = glm::vec3(0.f, 0.f, 0.f);
+
+	mom_movement = glm::vec3(0.f, 0.f, 0.f);
+
+	frame = 0;
+	animation = 0;
+
+
+	en = std::vector<Entity>();
+	// Split this model into multiple entities, grouping by texture
+	std::set<GLuint> texture_id_set(texture_ids.begin(), texture_ids.end());
+	std::vector<GLuint> unique_texture_ids = std::vector<GLuint>();
+	unique_texture_ids.assign(texture_id_set.begin(), texture_id_set.end());
+	for (int i = 0; i < unique_texture_ids.size(); i++) {
+
+		GLuint this_texture = unique_texture_ids.at(i);
+
+		std::vector<Vertex> entity_vertices;
+
+		// Add every vertex that belong to a particular texture
+		for (int i = 0; i < vertices.size(); i++) {
+			if (texture_ids.at(i) == this_texture) {
+				Vertex vert;
+
+				setPosition(vert, vertices.at(i).x, vertices.at(i).y, vertices.at(i).z); //vertex: width x height x length (set to 0.0 for a circle (flat), >= 1.0 for a cone)
+				setNormal(vert, vert.position[0], vert.position[1], vert.position[2]);
+				setColour(vert, glm::vec3(1.f, 1.f, 1.f));
+				vert.textureID = texture_ids.at(i);
+				vert.uv = texture_coords.at(i);
+
+				entity_vertices.push_back(vert);
+			}
+		}
+
+		Entity e = Entity(p, s, a, entity_vertices, this_texture);
+		en.push_back(e);
+	}
+
+
+	
+}
+
 void EntityGroup::Add(Entity e) {
 	en.push_back(e);
 	original_pos.push_back(e.position);

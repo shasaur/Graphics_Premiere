@@ -22,19 +22,43 @@ Entity::Entity(Shape sh) {
 	}
 }
 
-Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<glm::vec3> vertices) {
+// Model constructor
+Entity::Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a, 
+		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords,
+		GLuint texture_group) {
 	position = p;
 	size = s;
 	angle = a;
 
-	for (int i = 0; i < vertices.size(); i++) {
-		Vertex vert;
-		
-		setPosition(vert, vertices.at(i).x, vertices.at(i).y, vertices.at(i).z); //vertex: width x height x length (set to 0.0 for a circle (flat), >= 1.0 for a cone)
-		setNormal(vert, vert.position[0], vert.position[1], vert.position[2]);
-		setColour(vert, glm::vec3(1.f, 1.f, 1.f));
+	wiremesh = false;
+	textured = true;
 
-		push(vert);
+	for (int i = 0; i < vertices.size(); i++) {
+		if (texture_ids.at(i) == texture_group) {
+			Vertex vert;
+
+			setPosition(vert, vertices.at(i).x, vertices.at(i).y, vertices.at(i).z); //vertex: width x height x length (set to 0.0 for a circle (flat), >= 1.0 for a cone)
+			setNormal(vert, vert.position[0], vert.position[1], vert.position[2]);
+			setColour(vert, glm::vec3(1.f, 1.f, 1.f));
+			vert.textureID = texture_ids.at(i);
+			vert.uv = texture_coords.at(i);
+
+			push(vert);
+		}
+	}
+}
+
+Entity::Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vertex> vertices, GLuint textureID) {
+	position = p;
+	size = s;
+	angle = a;
+
+	wiremesh = false;
+	textured = true;
+	texID = textureID;
+
+	for (int i = 0; i < vertices.size(); i++) {
+		push(vertices.at(i));
 	}
 }
 
@@ -131,7 +155,6 @@ void Entity::SetupGeometry() {
 	// normal data will be in attribute index 2
 	glVertexAttribPointer((GLuint)2, 3, GL_FLOAT, GL_FALSE, sizeof(struct Vertex), (const GLvoid*)offsetof(struct Vertex, normal));   // bug );
 	glEnableVertexAttribArray(2);
-
 
 	if (textured) {
 		//glActiveTexture(GL_TEXTURE0 + texID);

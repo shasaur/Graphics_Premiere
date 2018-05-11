@@ -12,6 +12,7 @@ struct Vertex {
 	GLfloat normal[3];
 	GLfloat angle[3];
 	glm::vec2 uv;
+	GLuint textureID;
 };
 
 

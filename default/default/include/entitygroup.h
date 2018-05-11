@@ -2,6 +2,7 @@
 #define ENTITYGROUP_H
 
 #include "Entity.h"
+#include <set>
 
 
 class EntityGroup {
@@ -30,6 +31,8 @@ public:
 	glm::vec3 centre;
 
 	EntityGroup(Entity e);
+	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
+		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords);
 
 	void Add(Entity e);
 	void Move(GLint type, GLint length, glm::vec3 mag);

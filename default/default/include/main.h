@@ -4,7 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 
-
+#pragma comment(linker, "/STACK:2000000000")
+#pragma comment(linker, "/HEAP:2000000000")
 
 //////////////////////////////////////////////////////////
 // setup created by Alex Everett						//

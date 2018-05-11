@@ -3,54 +3,6 @@
 int renderMode = 1;
 bool pause = false;
 
-//void Check(const char *where) { // Function to check OpenGL error status
-//	const char * what;
-//	int err = glGetError();   //0 means no error
-//	if (!err)
-//		return;
-//	if (err == GL_INVALID_ENUM)
-//		what = "GL_INVALID_ENUM";
-//	else if (err == GL_INVALID_VALUE)
-//		what = "GL_INVALID_VALUE";
-//	else if (err == GL_INVALID_OPERATION)
-//		what = "GL_INVALID_OPERATION";
-//	else if (err == GL_INVALID_FRAMEBUFFER_OPERATION)
-//		what = "GL_INVALID_FRAMEBUFFER_OPERATION";
-//	else if (err == GL_OUT_OF_MEMORY)
-//		what = "GL_OUT_OF_MEMORY";
-//	else
-//		what = "Unknown Error";
-//	fprintf(stderr, "Error (%d) %s  at %s\n", err, what, where);
-//}
-//void CheckShader(int sp, const char *x) {
-//	int length;
-//	char text[1001];
-//	glGetProgramInfoLog(sp, 1000, &length, text);   // Check for errors
-//	if (length > 0) {
-//		fprintf(stderr, "Validate Shader Program\nMessage from:%s\n%s\n", x, text);
-//	}
-//}
-//char* filetobuf(char *file) { /* A simple function that will read a file into an allocated char pointer buffer */
-//	FILE *fptr;
-//	long length;
-//	char *buf;
-//	fprintf(stderr, "Loading %s\n", file);
-//#pragma warning (disable : 4996)
-//	fptr = fopen(file, "rb");   /* Open file for reading */
-//	if (!fptr) {   /* Return NULL on failure */
-//		fprintf(stderr, "failed to open %s\n", file);
-//		return NULL;
-//	}
-//	fseek(fptr, 0, SEEK_END);   /* Seek to the end of the file */
-//	length = ftell(fptr);   /* Find out how many bytes into the file we are */
-//	buf = (char*)malloc(length + 1);   /* Allocate a buffer for the entire length of the file and a null terminator */
-//	fseek(fptr, 0, SEEK_SET);   /* Go back to the beginning of the file */
-//	fread(buf, length, 1, fptr);   /* Read the contents of the file in to the buffer */
-//	fclose(fptr);   /* Close the file */
-//	buf[length] = 0;   /* Null terminator */
-//	return buf;   /* Return the buffer */
-//}
-
 /* This is a handle to the shader program */
 GLuint s1program, s2program, s3program;
 GLuint vao, vbo[1]; /* Create handles for our Vertex Array Object and One Vertex Buffer Object */
@@ -61,6 +13,7 @@ Scene* scenes[4];
 int current_scene = 0;
 
 GLuint mars_texture, saturn_texture, titan_texture, no_texture;
+std::map<std::string, GLuint> texture_map;
 
 ///*
 //Create a simple sphere
@@ -159,21 +112,76 @@ void SetupScenes() {
 	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	//scenes[1]->AddEntity(e4);
 
-	//std::vector<tinyobj::shape_t> shapes;
-	//std::vector<tinyobj::material_t> materials;
-	//std::vector< glm::vec3 > vertices;
-	//std::vector< Vertex > o;
+	std::vector<tinyobj::shape_t> shapes = std::vector<tinyobj::shape_t>();
+	std::vector<tinyobj::material_t> materials = std::vector<tinyobj::material_t>();
 
-	//std::string obj_err =
-	//	tinyobj::LoadObj(shapes, materials, filename, NULL);
+	std::string base = "models/NeghVar/";
+	std::string obj_err =
+		tinyobj::LoadObj(shapes, materials, "models/NeghVar/neghvar.obj", base.c_str());
 
-	//for (int i = 0; i < shapes.size(); i++)
-	//	for (int j = 0; j < shapes[i].mesh.indices.size(); j++)
-	//		vertices.push_back(glm::vec3(
-	//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3],
-	//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1],
-	//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2]
-	//		));
+	for (int i = 0; i < materials.size(); i++) {
+		printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname.c_str());
+		
+		//Load texture
+
+		std::string tex_name = materials[i].diffuse_texname;
+		GLuint t = loadTexture(std::string(base).append(tex_name).c_str());
+		texture_map.insert(std::make_pair(materials[i].diffuse_texname.c_str(), t));
+	}
+
+	//materials.push_back(tinyobj::material_t());
+
+	std::vector<glm::vec3> vertices = std::vector<glm::vec3>();
+	std::vector<glm::vec3> normals = std::vector<glm::vec3>();
+	std::vector<GLuint> texture_ids = std::vector<GLuint>();
+	std::vector<glm::vec2> texture_coords = std::vector<glm::vec2>();
+
+	// Go through every shape that makes up the model
+	for (int i = 0; i < shapes.size(); i++) {
+		printf("adding positions (i,max_i) = (%d,%d)\n", i, shapes.size());
+
+		// Go through every vertex
+		for (int j = 0; j < shapes[i].mesh.indices.size(); j++) {
+			printf("adding positions (j,max_j) = (%d,%d)\n", j, shapes[i].mesh.indices.size()); //   / 100.f
+			vertices.push_back(glm::vec3(
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3]*5.f,
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] * 5.f,
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] * 5.f
+			));
+
+			// If this is a textured vertex
+			if (shapes[i].mesh.texcoords.size() != 0) {
+
+				// Assign texture to triangle
+				printf("adding text ids\n");
+				int texture_index = shapes[i].mesh.material_ids[(int)floor((float)j / 3.f)];
+				GLuint texture_index_offset = texture_map.find(materials[texture_index].diffuse_texname.c_str())->second;
+				texture_ids.push_back(texture_index_offset);
+
+				// Assign point of texture to sample
+				printf("adding tex_coords (%d of %d)\n", shapes[i].mesh.indices[j] * 2 + 1, shapes[i].mesh.texcoords.size());
+				texture_coords.push_back(glm::vec2(
+					shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2],
+					shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2 + 1]
+				));
+
+				//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname);
+			} else {
+				// Assign texture to triangle
+				printf("vertex is coloured, no texture\n");
+				texture_ids.push_back(-1);
+				texture_coords.push_back(glm::vec2(0.f, 0.f));
+			}
+		}
+	}
+
+	//Entity e4(glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords, 10);
+	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	//scenes[1]->AddEntity(e4);
+
+	EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
+	scenes[1]->groups.push_back(spaceship_model);
+
 
 	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
 }
@@ -266,7 +274,7 @@ int main() {
 	init();
 
 
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "COMP3214 Coursework Physics", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "COMP3214 Final Coursework", nullptr, nullptr);
 
 	int screenWidth, screenHeight;
 	glfwGetFramebufferSize(window, &screenWidth, &screenHeight);
@@ -299,9 +307,12 @@ int main() {
 	glEnable(GL_TEXTURE_2D);
 	//glDepthMask(GL_FALSE);
 
+	texture_map = std::map<std::string, GLuint>();
 	saturn_texture = loadTexture("textures/saturn.jpg");
 	//mars_texture = loadTexture("textures/mars.jpg");
 	titan_texture = loadTexture("textures/titan.jpg");
+	texture_map.insert(std::make_pair("saturn", saturn_texture));
+	texture_map.insert(std::make_pair("titan", titan_texture));
 
 	SetupScenes();
 	SetupShaders();
