@@ -112,76 +112,83 @@ void SetupScenes() {
 	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	//scenes[1]->AddEntity(e4);
 
-	std::vector<tinyobj::shape_t> shapes = std::vector<tinyobj::shape_t>();
-	std::vector<tinyobj::material_t> materials = std::vector<tinyobj::material_t>();
+	{
+		//std::vector<tinyobj::shape_t> shapes = std::vector<tinyobj::shape_t>();
+		//std::vector<tinyobj::material_t> materials = std::vector<tinyobj::material_t>();
 
-	std::string base = "models/NeghVar/";
-	std::string obj_err =
-		tinyobj::LoadObj(shapes, materials, "models/NeghVar/neghvar.obj", base.c_str());
+		//std::string base = "models/NeghVar/";
+		//std::string obj_err =
+		//	tinyobj::LoadObj(shapes, materials, "models/NeghVar/neghvar.obj", base.c_str());
 
-	for (int i = 0; i < materials.size(); i++) {
-		printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname.c_str());
-		
-		//Load texture
+		//for (int i = 0; i < materials.size(); i++) {
+		//	printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname.c_str());
+		//	
+		//	//Load texture
 
-		std::string tex_name = materials[i].diffuse_texname;
-		GLuint t = loadTexture(std::string(base).append(tex_name).c_str());
-		texture_map.insert(std::make_pair(materials[i].diffuse_texname.c_str(), t));
+		//	std::string tex_name = materials[i].diffuse_texname;
+		//	GLuint t = loadTexture(std::string(base).append(tex_name).c_str());
+		//	texture_map.insert(std::make_pair(materials[i].diffuse_texname.c_str(), t));
+		//}
+
+		////materials.push_back(tinyobj::material_t());
+
+		//std::vector<glm::vec3> vertices = std::vector<glm::vec3>();
+		//std::vector<glm::vec3> normals = std::vector<glm::vec3>();
+		//std::vector<GLuint> texture_ids = std::vector<GLuint>();
+		//std::vector<glm::vec2> texture_coords = std::vector<glm::vec2>();
+
+		//// Go through every shape that makes up the model
+		//for (int i = 0; i < shapes.size(); i++) {
+		//	printf("adding positions (i,max_i) = (%d,%d)\n", i, shapes.size());
+
+		//	// Go through every vertex
+		//	for (int j = 0; j < shapes[i].mesh.indices.size(); j++) {
+		//		printf("adding positions (j,max_j) = (%d,%d)\n", j, shapes[i].mesh.indices.size()); //   / 100.f
+		//		vertices.push_back(glm::vec3(
+		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3]*5.f,
+		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] * 5.f,
+		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] * 5.f
+		//		));
+
+		//		// If this is a textured vertex
+		//		if (shapes[i].mesh.texcoords.size() != 0) {
+
+		//			// Assign texture to triangle
+		//			printf("adding text ids\n");
+		//			int texture_index = shapes[i].mesh.material_ids[(int)floor((float)j / 3.f)];
+		//			GLuint texture_index_offset = texture_map.find(materials[texture_index].diffuse_texname.c_str())->second;
+		//			texture_ids.push_back(texture_index_offset);
+
+		//			// Assign point of texture to sample
+		//			printf("adding tex_coords (%d of %d)\n", shapes[i].mesh.indices[j] * 2 + 1, shapes[i].mesh.texcoords.size());
+		//			texture_coords.push_back(glm::vec2(
+		//				shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2],
+		//				shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2 + 1]
+		//			));
+
+		//			//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname);
+		//		} else {
+		//			// Assign texture to triangle
+		//			printf("vertex is coloured, no texture\n");
+		//			texture_ids.push_back(-1);
+		//			texture_coords.push_back(glm::vec2(0.f, 0.f));
+		//		}
+		//	}
+		//}
+
+		////Entity e4(glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords, 10);
+		////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+		////scenes[1]->AddEntity(e4);
+
+		//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
+		//scenes[1]->groups.push_back(spaceship_model);
 	}
 
-	//materials.push_back(tinyobj::material_t());
+	EntityGroup shield = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f));
+	scenes[1]->groups.push_back(shield);
 
-	std::vector<glm::vec3> vertices = std::vector<glm::vec3>();
-	std::vector<glm::vec3> normals = std::vector<glm::vec3>();
-	std::vector<GLuint> texture_ids = std::vector<GLuint>();
-	std::vector<glm::vec2> texture_coords = std::vector<glm::vec2>();
-
-	// Go through every shape that makes up the model
-	for (int i = 0; i < shapes.size(); i++) {
-		printf("adding positions (i,max_i) = (%d,%d)\n", i, shapes.size());
-
-		// Go through every vertex
-		for (int j = 0; j < shapes[i].mesh.indices.size(); j++) {
-			printf("adding positions (j,max_j) = (%d,%d)\n", j, shapes[i].mesh.indices.size()); //   / 100.f
-			vertices.push_back(glm::vec3(
-				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3]*5.f,
-				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] * 5.f,
-				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] * 5.f
-			));
-
-			// If this is a textured vertex
-			if (shapes[i].mesh.texcoords.size() != 0) {
-
-				// Assign texture to triangle
-				printf("adding text ids\n");
-				int texture_index = shapes[i].mesh.material_ids[(int)floor((float)j / 3.f)];
-				GLuint texture_index_offset = texture_map.find(materials[texture_index].diffuse_texname.c_str())->second;
-				texture_ids.push_back(texture_index_offset);
-
-				// Assign point of texture to sample
-				printf("adding tex_coords (%d of %d)\n", shapes[i].mesh.indices[j] * 2 + 1, shapes[i].mesh.texcoords.size());
-				texture_coords.push_back(glm::vec2(
-					shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2],
-					shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2 + 1]
-				));
-
-				//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname);
-			} else {
-				// Assign texture to triangle
-				printf("vertex is coloured, no texture\n");
-				texture_ids.push_back(-1);
-				texture_coords.push_back(glm::vec2(0.f, 0.f));
-			}
-		}
-	}
-
-	//Entity e4(glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords, 10);
-	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-	//scenes[1]->AddEntity(e4);
-
-	EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
-	scenes[1]->groups.push_back(spaceship_model);
-
+		//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
+		//scenes[1]->groups.push_back(spaceship_model);
 
 	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
 }

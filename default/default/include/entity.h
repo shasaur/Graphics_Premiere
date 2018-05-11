@@ -41,7 +41,7 @@ public:
 	void FreeGeometry();
 	void SetupGeometry();
 
-	enum Shape { Sphere, Cone, Cylinder, Cube };
+	enum Shape { Sphere, Cone, Cylinder, Cube, Shield };
 
 	glm::dvec3 position;
 	glm::vec3 size;
@@ -68,6 +68,7 @@ public:
 		GLuint texture_group); // model loading
 
 	void CreateCube(bool wiremesh);
+	void CreateShieldSphere(int n, bool wiremesh);
 	void CreateSimpleSphere(int n, bool wiremesh);
 	void CreateCylinder(bool capped);
 	void CreateCone(glm::vec3 c, GLfloat height, glm::vec3 n);

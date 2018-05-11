@@ -87,6 +87,39 @@ EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 	
 }
 
+// Shield group
+EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a) {
+	group_mov = glm::vec3(0.f, 0.f, 0.f);
+	current_ang_mom = glm::vec3(0.f, 0.f, 0.f);
+	total_ang_mom = glm::vec3(0.f, 0.f, 0.f);
+
+
+	// Animation
+	an_types = std::vector<GLuint>();
+	an_lengths = std::vector<GLuint>();
+	an_ang_mags = std::vector<GLfloat>();
+	an_ang_dirs = std::vector<glm::vec3>();
+
+	mom_angular_magnitude = 0.f;
+	mom_angular_direction = glm::vec3(0.f, 0.f, 0.f);
+
+	mom_movement = glm::vec3(0.f, 0.f, 0.f);
+
+
+	frame = 0;
+	animation = 0;
+
+	angle = glm::vec3(0.f, 0.f, 0.f);
+
+	// Add shield parts
+	en = std::vector<Entity>();
+
+
+	Entity shieldTrial = Entity(Entity::Shield, p, s, a, 100, false);
+	centre = shieldTrial.position;
+	Add(shieldTrial);
+}
+
 void EntityGroup::Add(Entity e) {
 	en.push_back(e);
 	original_pos.push_back(e.position);

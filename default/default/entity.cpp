@@ -85,6 +85,9 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w,
 	case Shape::Sphere:{
 		CreateSimpleSphere(res, w);
 		break; };
+	case Shape::Shield: {
+		CreateShieldSphere(res, w);
+		break; };
 	}
 }
 
@@ -111,6 +114,9 @@ Entity::Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool
 		break; };
 	case Shape::Sphere: {
 		CreateSimpleSphere(res, w);
+		break; };
+	case Shape::Shield: {
+		CreateShieldSphere(res, w);
 		break; };
 	}
 }
@@ -227,6 +233,82 @@ void Entity::CreateCube(bool wiremesh){
 			
 			push(part1);
 			push(part2);
+		}
+	}
+}
+
+void Entity::CreateShieldSphere(int n, bool wiremesh)
+{
+	int i = 25;
+	int j;
+	double theta1, theta2, theta3;
+	glm::vec3 e, p;
+
+	GLfloat r = 1.f;
+	// vertical
+	for (j = 0; j<n / 2; j++) {
+		theta1 = j * TWOPI / n - PID2;
+		theta2 = (j + 1) * TWOPI / n - PID2;
+
+
+		theta3 = i * TWOPI / n;
+
+		// SIMPLIFY ALL OF THIS
+
+		Vertex v1;
+		setColour(v1, shape_colour);
+		setPosition(v1, r * cos(theta2) * cos(theta3), sin(theta2), r * cos(theta2) * sin(theta3));
+		setNormal(v1, v1.position[0], v1.position[1], v1.position[2]);
+		v1.uv = glm::vec2((atan2(v1.position[0], v1.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v1.position[1]) / 3.1415926 + 0.5));
+
+		e.x = cos(theta1) * cos(theta3);
+		e.y = sin(theta1);
+		e.z = cos(theta1) * sin(theta3);
+
+		Vertex v2;
+		setColour(v2, v1);
+		setPosition(v2, r * e.x, r * e.y, r * e.z);
+		setNormal(v2, v2.position[0], v2.position[1], v2.position[2]);
+		v2.uv = glm::vec2((atan2(v2.position[0], v2.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v2.position[1]) / 3.1415926 + 0.5));
+
+
+		theta3 = (i + 1) * TWOPI / n;
+
+		e.x = cos(theta2) * cos(theta3);
+		e.y = sin(theta2);
+		e.z = cos(theta2) * sin(theta3);
+
+		Vertex v3;
+		setColour(v3, v1);
+		setPosition(v3, r * e.x, r * e.y, r * e.z);
+		setNormal(v3, v3.position[0], v3.position[1], v3.position[2]);
+		v3.uv = glm::vec2((atan2(v3.position[0], v3.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v3.position[1]) / 3.1415926 + 0.5));
+
+
+		e.x = cos(theta1) * cos(theta3);
+		e.y = sin(theta1);
+		e.z = cos(theta1) * sin(theta3);
+
+		Vertex v4;
+		setColour(v4, v1);
+		setPosition(v4, r * e.x, r * e.y, r * e.z);
+		setNormal(v4, v4.position[0], v4.position[1], v4.position[2]);
+		v4.uv = glm::vec2((atan2(v4.position[0], v4.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v4.position[1]) / 3.1415926 + 0.5));
+
+		if (wiremesh) {
+			push(v1);
+			push(v2);
+			push(v4);
+			push(v3);
+		}
+		else {
+			push(v1);
+			push(v2);
+			push(v3);
+
+			push(v2);
+			push(v3);
+			push(v4);
 		}
 	}
 }
