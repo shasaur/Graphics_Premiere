@@ -12,7 +12,7 @@ std::vector<Vertex> v;
 Scene* scenes[4];
 int current_scene = 0;
 
-GLuint mars_texture, saturn_texture, titan_texture, no_texture;
+GLuint default_texture, mars_texture, saturn_texture, titan_texture, no_texture, space_texture;
 std::map<std::string, GLuint> texture_map;
 
 ///*
@@ -109,6 +109,8 @@ void SetupScenes() {
 	e3.SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	scenes[1]->AddEntity(e3);
 
+
+
 	//Entity e4(Entity::Sphere, glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.5f, 0.5f, 1.0f });
 	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	//scenes[1]->AddEntity(e4);
@@ -192,13 +194,13 @@ void SetupScenes() {
 	//scenes[1]->groups.push_back(spaceship_model);
 
 	// Demo spaceship
-	Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, { 0.2f, 0.2f, 0.9f });
+	Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, default_texture, { 0.2f, 0.2f, 0.9f });
 	e4->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	//SpaceshipGroup* spaceship_model = new SpaceshipGroup(*e4);
 	scenes[1]->AddEntity(*e4);
 
 	// Demo enemy
-	Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, -5.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, { 0.9f, 0.2f, 0.2f });
+	Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, -5.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, default_texture, { 0.9f, 0.2f, 0.2f });
 	e5->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	SpaceshipGroup* enemy_spaceship_model = new SpaceshipGroup(*e5);
 	
@@ -209,6 +211,9 @@ void SetupScenes() {
 	enemy_spaceship_model->AddWeaponSystem(enemy_weapons, e4, scenes[1]);
 	
 	scenes[1]->groups.push_back(enemy_spaceship_model);
+
+	Entity back(Entity::Background, glm::vec3(0.f, 0.f, -40.f), glm::vec3(500.f, 500.f, 500.f), glm::vec3(0.f, 0.f, 0.f), 100, space_texture, { 1.f, 1.f, 1.f });
+	scenes[1]->AddEntity(back);
 }
 
 GLuint InitialiseShader(GLchar* vertex_source, GLchar* fragment_source) {
@@ -281,6 +286,19 @@ void Render() {
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+
+	printf("KEY PRESSED (%d, %d)\n", key, action);
+	if ((key == GLFW_KEY_LEFT) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->cameraAngle.y += 0.1f;
+
+	if ((key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->cameraAngle.y -= 0.1f;
+
+	if ((key == GLFW_KEY_PAGE_UP) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->cameraAngle.x -= 0.1f;
+
+	if ((key == GLFW_KEY_PAGE_DOWN) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->cameraAngle.x += 0.1f;
 }
 
 void init() {
@@ -330,14 +348,17 @@ int main() {
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
-	//glDepthMask(GL_FALSE);
 
 	texture_map = std::map<std::string, GLuint>();
+	default_texture = loadTexture("textures/default.jpg");
 	saturn_texture = loadTexture("textures/saturn.jpg");
 	//mars_texture = loadTexture("textures/mars.jpg");
 	titan_texture = loadTexture("textures/titan.jpg");
+	space_texture = loadTexture("textures/space_2.jpg");
+	texture_map.insert(std::make_pair("default", default_texture));
 	texture_map.insert(std::make_pair("saturn", saturn_texture));
 	texture_map.insert(std::make_pair("titan", titan_texture));
+	texture_map.insert(std::make_pair("space", space_texture));
 
 	SetupScenes();
 	SetupShaders();

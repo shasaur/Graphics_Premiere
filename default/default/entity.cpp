@@ -4,29 +4,44 @@
 void Entity::init(Shape sh) {
 	moving = None;
 	shape = sh;
+
+	GLuint vao = NULL, vbo = NULL;
+	GLuint texID = NULL;
+
+	glm::dvec3 position(0.,0.,0.);
+	glm::vec3 size(1.f,1.f,1.f);
+	btVector3 vel(0.f,0.f,0.f);
+
+	glm::vec3 angle(0.f,0.f,0.f);
+	float theta = 0;
+
+	glm::vec3 shape_colour(1.f, 1.f, 1.f);
+
+	bool wiremesh = false, textured = false;
+
+	std::vector<Vertex> v = std::vector<Vertex>();
 }
 
-Entity::Entity(Shape sh) {
+Entity::Entity(Shape sh, GLuint textureID) {
 	init(sh);
 
 	position = glm::vec3(0.f, 0.f, 0.f);
-	size = glm::vec3(1.f, 1.f, 1.f);
-	angle = glm::vec3(1.f, 1.f, 1.f);
+	size = glm::vec3(100.f, 100.f, 100.f);
+	angle = glm::vec3(0.f, 0.f, 0.f);
 	shape = sh;
+	shape_colour = glm::vec3(1.f,1.f,1.f);
 
 	wiremesh = false;
-	textured = false;
+	textured = true;
+	texID = textureID;
+
 
 	switch (sh) {
-	case Shape::Cone:
-	{break; };
-	case Shape::Cube:
-	{break; };
-	case Shape::Cylinder:{
+	case Shape::Background: {
+		CreateSphere(100, false, false);
 		break; };
-	case Shape::Sphere:{
-		CreateSimpleSphere(10, false);
-		break;};
+
+	default: printf("Error: No such entity type!"); break;
 	}
 }
 
@@ -97,7 +112,7 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, glm::ve
 		CreateCylinder(true);
 		break; };
 	case Shape::Sphere:{
-		CreateSimpleSphere(res, wiremesh);
+		CreateSphere(res, wiremesh, true);
 		break; };
 	default: printf("Error: No such entity type!"); break;
 	}
@@ -147,7 +162,10 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, GLuint 
 		CreateCylinder(true);
 		break; };
 	case Shape::Sphere: {
-		CreateSimpleSphere(res, wiremesh);
+		CreateSphere(res, wiremesh, true);
+		break; };
+	case Shape::Background: {
+		CreateSphere(100, false, false);
 		break; };
 
 	default: printf("Error: No such entity type!"); break;
@@ -350,8 +368,12 @@ void Entity::CreateShieldSphere(int n, int start, int end)
 	}
 }
 
-void Entity::CreateSimpleSphere(int n, bool wiremesh)
+void Entity::CreateSphere(int n, bool wiremesh, bool lighting)
 {
+	// Defaults
+	glm::vec3 d_n(0.f, 0.f, 1.f);
+	glm::vec2 d_uv(0.f, 0.f);
+
 	int i, j;
 	double theta1, theta2, theta3;
 	glm::vec3 e, p;
@@ -372,8 +394,12 @@ void Entity::CreateSimpleSphere(int n, bool wiremesh)
 			Vertex v1;
 			setColour(v1, shape_colour); 
 			setPosition(v1, r * cos(theta2) * cos(theta3), sin(theta2), r * cos(theta2) * sin(theta3));
-			setNormal(v1, v1.position[0], v1.position[1], v1.position[2]); 
+			//
 			v1.uv = glm::vec2((atan2(v1.position[0], v1.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v1.position[1]) / 3.1415926 + 0.5));
+			if (lighting)
+				setNormal(v1, v1.position[0], v1.position[1], v1.position[2]); 
+			else
+				setNormal(v1, d_n.x, d_n.y, d_n.z);
 
 			e.x = cos(theta1) * cos(theta3);
 			e.y = sin(theta1);
@@ -382,9 +408,11 @@ void Entity::CreateSimpleSphere(int n, bool wiremesh)
 			Vertex v2;
 			setColour(v2, v1);
 			setPosition(v2, r * e.x, r * e.y, r * e.z);
-			setNormal(v2, v2.position[0], v2.position[1], v2.position[2]);
 			v2.uv = glm::vec2((atan2(v2.position[0], v2.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v2.position[1]) / 3.1415926 + 0.5));
-
+			if (lighting)
+				setNormal(v2, v2.position[0], v2.position[1], v2.position[2]);
+			else
+				setNormal(v2, d_n.x, d_n.y, d_n.z);
 
 			theta3 = (i + 1) * TWOPI / n;
 
@@ -395,9 +423,11 @@ void Entity::CreateSimpleSphere(int n, bool wiremesh)
 			Vertex v3;
 			setColour(v3, v1);
 			setPosition(v3, r * e.x, r * e.y, r * e.z);
-			setNormal(v3, v3.position[0], v3.position[1], v3.position[2]);
 			v3.uv = glm::vec2((atan2(v3.position[0], v3.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v3.position[1]) / 3.1415926 + 0.5));
-
+			if (lighting)
+				setNormal(v3, v3.position[0], v3.position[1], v3.position[2]);
+			else
+				setNormal(v3, d_n.x, d_n.y, d_n.z);
 
 			e.x = cos(theta1) * cos(theta3);
 			e.y = sin(theta1);
@@ -406,8 +436,11 @@ void Entity::CreateSimpleSphere(int n, bool wiremesh)
 			Vertex v4;
 			setColour(v4, v1);
 			setPosition(v4, r * e.x, r * e.y, r * e.z);
-			setNormal(v4, v4.position[0], v4.position[1], v4.position[2]);
 			v4.uv = glm::vec2((atan2(v4.position[0], v4.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v4.position[1]) / 3.1415926 + 0.5));
+			if (lighting)
+				setNormal(v4, v4.position[0], v4.position[1], v4.position[2]);
+			else
+				setNormal(v4, d_n.x, d_n.y, d_n.z);
 
 			if (wiremesh) {
 				push(v1);

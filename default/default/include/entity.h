@@ -42,7 +42,7 @@ public:
 	void FreeGeometry();
 	void SetupGeometry();
 
-	enum Shape { Sphere, Cone, Cylinder, Cube, Shield, Model };
+	enum Shape { Sphere, Cone, Cylinder, Cube, Shield, Model, Background };
 	enum Movement { None, Static, Dynamic };
 	void init(Shape shape);
 
@@ -63,7 +63,7 @@ public:
 	std::vector<Vertex> v;
 
 	// - Functions -
-	Entity(Shape shape);
+	Entity(Shape shape, GLuint textureID);
 	Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vertex> vertices, GLuint textureID);
 	Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, glm::vec3 colour); // solid colour entity
 	Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, GLuint textureID, glm::vec3 colour); // textured entity
@@ -74,7 +74,7 @@ public:
 
 	void CreateCube(bool wiremesh);
 	void CreateShieldSphere(int n, int start, int end);
-	void CreateSimpleSphere(int n, bool wiremesh);
+	void CreateSphere(int n, bool wiremesh, bool lighting);
 	void CreateCylinder(bool capped);
 	void CreateCone(glm::vec3 c, GLfloat height, glm::vec3 n);
 

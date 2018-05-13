@@ -25,7 +25,6 @@ class Scene {
 	std::vector<Entity> entities;
 	std::vector<Projectile> pr;
 
-	glm::vec3 cameraAngle;
 	glm::vec3 cameraRotation;
 	float cameraSpeed = 0.01f;
 	glm::vec3 cameraPosition;
@@ -51,6 +50,7 @@ class Scene {
 	std::vector<btRigidBody*> StaticBits; // especially during clean up.
 
 public:
+	glm::vec3 cameraAngle;
 	std::vector<EntityGroup*> groups;
 
 	Scene::Scene();

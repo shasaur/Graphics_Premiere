@@ -47,6 +47,8 @@ void Scene::AddEntity(Entity e) {
 		else
 			bulletEntityBodies.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel));
 	}
+	else
+		bulletEntityBodies.push_back(nullptr);
 
 }
 
@@ -124,51 +126,55 @@ void Scene::SetupPhysics() {
 
 void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects) {
 	for (int i = 0; i < bodies.size(); i++) {
-		btTransform trans;
-		btRigidBody* moveRigidBody = bodies[i];
-		moveRigidBody->getMotionState()->getWorldTransform(trans);
+		if (bodies.at(i) != nullptr) {
+			btTransform trans;
+			btRigidBody* moveRigidBody = bodies[i];
+			moveRigidBody->getMotionState()->getWorldTransform(trans);
 
-		//printf("%f, %f, %f\n", position.x, position.y, position.z);
-		glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-		//btVector3 a = moveRigidBody->getAngularFactor();
+			//printf("%f, %f, %f\n", position.x, position.y, position.z);
+			glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+			//btVector3 a = moveRigidBody->getAngularFactor();
 
-		btQuaternion a = moveRigidBody->getCenterOfMassTransform().getRotation();
-		glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-		float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
+			btQuaternion a = moveRigidBody->getCenterOfMassTransform().getRotation();
+			glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+			float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
 
-		//printf("%f, %f, %f\n", an.x, an.y, 0);
-		//glm::mat4 btMat = glm::mat4(trans)
-		//btMat.getRotation(trans.getRotation())
+			//printf("%f, %f, %f\n", an.x, an.y, 0);
+			//glm::mat4 btMat = glm::mat4(trans)
+			//btMat.getRotation(trans.getRotation())
 
-		objects->at(i).position = position;
-		objects->at(i).angle = an;
-		objects->at(i).theta = theta;
+			objects->at(i).position = position;
+			objects->at(i).angle = an;
+			objects->at(i).theta = theta;
+		}
 	}
 }
 
 void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Projectile>* objects) {
 	for (int i = 0; i < bodies.size(); i++) {
-		btTransform trans;
-		btRigidBody* moveRigidBody;
-		int n = bodies.size();
-		moveRigidBody = bodies[i];
-		moveRigidBody->getMotionState()->getWorldTransform(trans);
+		if (bodies.at(i) != nullptr) {
+			btTransform trans;
+			btRigidBody* moveRigidBody;
+			int n = bodies.size();
+			moveRigidBody = bodies[i];
+			moveRigidBody->getMotionState()->getWorldTransform(trans);
 
-		//printf("%f, %f, %f\n", position.x, position.y, position.z);
-		glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-		//btVector3 a = moveRigidBody->getAngularFactor();
+			//printf("%f, %f, %f\n", position.x, position.y, position.z);
+			glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+			//btVector3 a = moveRigidBody->getAngularFactor();
 
-		btQuaternion a = moveRigidBody->getCenterOfMassTransform().getRotation();
-		glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-		float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
+			btQuaternion a = moveRigidBody->getCenterOfMassTransform().getRotation();
+			glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+			float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
 
-		//printf("%f, %f, %f\n", an.x, an.y, 0);
-		//glm::mat4 btMat = glm::mat4(trans)
-		//btMat.getRotation(trans.getRotation())
+			//printf("%f, %f, %f\n", an.x, an.y, 0);
+			//glm::mat4 btMat = glm::mat4(trans)
+			//btMat.getRotation(trans.getRotation())
 
-		objects->at(i).position = position;
-		objects->at(i).angle = an;
-		objects->at(i).theta = theta;
+			objects->at(i).position = position;
+			objects->at(i).angle = an;
+			objects->at(i).theta = theta;
+		}
 	}
 }
 
@@ -240,10 +246,30 @@ void Scene::setWall(btDiscreteDynamicsWorld* world, btVector3 side, double dista
 
 // BULLET PHYSICS END //
 
+float dot(glm::vec3 a, glm::vec3 b)  //calculates dot product of a and b
+{
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+float mag(glm::vec3 a)  //calculates magnitude of a
+{
+	return std::sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+}
 
 void Scene::SpawnShield(glm::vec3 centre, glm::vec3 hitPoint) {
+
+	float x = (hitPoint - centre).x;
+	float y = (hitPoint - centre).y;
+	float z = (hitPoint - centre).z;
+
+	float ax = atan2(sqrt((y*y) + (z*z)), x);
+	float ay = atan2(sqrt((z*z) + (x*x)), y);
+	float az = atan2(sqrt((z*z) + (y*y)), z);
+
+	printf("shield(%f,%f,%f)\n", ax,ay,az);
+
 	// Shield pieces
-	ShieldGroup* shield = new ShieldGroup(EntityGroup::Shield, centre, glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.5f, 0.f, 0.f));
+	ShieldGroup* shield = new ShieldGroup(EntityGroup::Shield, centre, glm::vec3(10.f, 10.f, 10.f), glm::vec3(ax + (PI/2.0), ay, az));//centre - hitPoint);//glm::vec3(0.5f, -1.f, 2.f));
 	groups.push_back(shield);
 }
 
@@ -334,6 +360,7 @@ void Scene::DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 Vie
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "mvpmatrix"), 1, GL_FALSE, glm::value_ptr(MVP));
 	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "modelmatrix"), 1, GL_FALSE, glm::value_ptr(Angle));
+	glUniform1i(glGetUniformLocation(shaderprogram, "text"), 1);
 
 	if (e.textured) {
 		//printf("Drawing textured image\n");
