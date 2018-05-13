@@ -7,10 +7,12 @@ Scene::Scene() {
 	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
 	cameraSpeed = 0.f;
 
-	groups = std::vector<EntityGroup>();
+	groups = std::vector<EntityGroup*>();
 
 	frame = 0;
 	SetupPhysics();  	// set up physics
+
+	pr = std::vector<Entity>();
 }
 
 //Scene::Scene(glm::vec3 cam) {
@@ -34,25 +36,40 @@ void Scene::Rotate(glm::vec3 rot) {
 }
 
 void Scene::AddEntity(Entity e) {
-	e.add_my_vertices(v);
-	en.push_back(e);
+	//e.add_my_vertices(v);
+
+	e.SetupGeometry();
+	entities.push_back(e);
+
+	if (e.moving) {
+		if (e.shape == Entity::Sphere)
+			bulletEntityBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel)); // last one is velocity
+		else
+			bulletEntityBodies.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel));
+	}
+
+}
+
+void Scene::AddProjectile(Entity e) {
+	e.SetupGeometry();
+	pr.push_back(e);
 
 	if (e.shape == Entity::Sphere)
-		MovingBits.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)),e.vel)); // last one is velocity
+		bulletProjectileBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel)); // last one is velocity
 	else
-		MovingBits.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)),e.vel));
+		bulletProjectileBodies.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel));
 }
 
-void Scene::AddEntities(Entity* e, int n) {
-	for (int i = 0; i < n; i++) {
-		e[i].add_my_vertices(v);
-		en.push_back(e[i]);
-	}
-}
+//void Scene::AddEntities(Entity* e, int n) {
+//	for (int i = 0; i < n; i++) {
+//		e[i].add_my_vertices(v);
+//		en.push_back(e[i]);
+//	}
+//}
 
 void Scene::AddGroups(EntityGroup* e, int n) {
 	for (int i = 0; i < n; i++) {
-		groups.push_back(e[i]);
+		groups.push_back(&e[i]);
 	}
 }
 
@@ -60,25 +77,25 @@ void Scene::AddGroups(EntityGroup* e, int n) {
 
 void Scene::FreeGeometry() {
 	for (int g = 0; g < groups.size(); g++) {
-		for (int i = 0; i < groups.at(g).en.size(); i++) {
-			groups.at(g).en.at(i).FreeGeometry();
+		for (int i = 0; i < groups.at(g)->en.size(); i++) {
+			groups.at(g)->en.at(i).FreeGeometry();
 		}
 	}
 
-	for (int i = 0; i < en.size(); i++) {
-		en[i].FreeGeometry();
+	for (int i = 0; i < entities.size(); i++) {
+		entities[i].FreeGeometry();
+	}
+
+	for (int i = 0; i < pr.size(); i++) {
+		pr[i].FreeGeometry();
 	}
 }
 
 void Scene::SetupGeometry() {
 	for (int g = 0; g < groups.size(); g++) {
-		for (int i = 0; i < groups.at(g).en.size(); i++) {
-			groups.at(g).en.at(i).SetupGeometry();
+		for (int i = 0; i < groups.at(g)->en.size(); i++) {
+			groups.at(g)->en.at(i).SetupGeometry();
 		}
-	}
-
-	for (int i = 0; i < en.size(); i++) {
-		en[i].SetupGeometry();
 	}
 }
 
@@ -102,17 +119,16 @@ void Scene::SetupPhysics() {
 	//setWall(dynamicsWorld, btVector3(0, 0, 1), box_size);
 	//setWall(dynamicsWorld, btVector3(0, 0, -1), box_size);
 
-	printf("Setup Bullet ");
-	int n = MovingBits.size();
-	printf("%d", n);
+	printf("Setup Bullet\n");
 }
 
-void Scene::UpdatePhysics() {
-	for (int i = 0; i < MovingBits.size(); i++) {
+void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects) {
+	printf("No of moving bodies (%d) vs No of projectiles(%d)\n", bodies.size(), pr.size());
+	for (int i = 0; i < bodies.size(); i++) {
 		btTransform trans;
 		btRigidBody* moveRigidBody;
-		int n = MovingBits.size();
-		moveRigidBody = MovingBits[i];
+		int n = bodies.size();
+		moveRigidBody = bodies[i];
 		moveRigidBody->getMotionState()->getWorldTransform(trans);
 
 		//printf("%f, %f, %f\n", position.x, position.y, position.z);
@@ -127,9 +143,9 @@ void Scene::UpdatePhysics() {
 		//glm::mat4 btMat = glm::mat4(trans)
 		//btMat.getRotation(trans.getRotation())
 
-		en.at(i).position = position;
-		en.at(i).angle = an;
-		en.at(i).theta = theta;
+		objects->at(i).position = position;
+		objects->at(i).angle = an;
+		objects->at(i).theta = theta;
 	}
 }
 
@@ -138,7 +154,7 @@ void Scene::DestructPhysics() {
 	* This is very minimal and relies on OS to tidy up.
 	*/
 	btRigidBody* moveRigidBody;
-	moveRigidBody = MovingBits[0];
+	moveRigidBody = bulletEntityBodies[0];
 	dynamicsWorld->removeRigidBody(moveRigidBody);
 	delete moveRigidBody->getMotionState();
 	delete moveRigidBody;
@@ -209,7 +225,8 @@ void Scene::Update(GLint screenID) {
 	// Update physics
 	dynamicsWorld->stepSimulation(1 / 120.f, 20);
 
-	UpdatePhysics();
+	UpdatePhysics(bulletEntityBodies, &entities);
+	UpdatePhysics(bulletProjectileBodies, &pr);
 
 	//for (int i = 0; i < en.size(); i++) {
 	//	if (screenID == 2) {
@@ -237,7 +254,7 @@ void Scene::Update(GLint screenID) {
 	//cameraAngle.y -= 0.001;
 
 	for (int i = 0; i < groups.size(); i++) {
-		groups.at(i).Animate();
+		groups.at(i)->Animate();
 	}
 
 	frame++;
@@ -315,12 +332,17 @@ void Scene::Render(GLuint shaderprogram, GLuint vao) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (int g = 0; g < groups.size(); g++) {
-		for (int i = 0; i < groups.at(g).en.size(); i++) {
-			DrawEntity(shaderprogram, Projection, View, groups.at(g).en.at(i));
+		groups.at(g)->Update();
+		for (int i = 0; i < groups.at(g)->en.size(); i++) {
+			DrawEntity(shaderprogram, Projection, View, groups.at(g)->en.at(i));
 		}
 	}
 
-	for (int i = 0; i < en.size(); i++) {
-		DrawEntity(shaderprogram, Projection, View, en.at(i));
+	for (int i = 0; i < entities.size(); i++) {
+		DrawEntity(shaderprogram, Projection, View, entities.at(i));
+	}
+
+	for (int i = 0; i < pr.size(); i++) {
+		DrawEntity(shaderprogram, Projection, View, pr.at(i));
 	}
 }

@@ -99,6 +99,7 @@ void SetupScenes() {
 
 
 	scenes[1] = new Scene();//glm::vec3(0.f, 0.f, -15.f));
+	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
 
 	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, false, saturn_texture, { 1.f, 1.f, 1.f });
 	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
@@ -122,7 +123,7 @@ void SetupScenes() {
 
 		//for (int i = 0; i < materials.size(); i++) {
 		//	printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname.c_str());
-		//	
+
 		//	//Load texture
 
 		//	std::string tex_name = materials[i].diffuse_texname;
@@ -145,7 +146,7 @@ void SetupScenes() {
 		//	for (int j = 0; j < shapes[i].mesh.indices.size(); j++) {
 		//		printf("adding positions (j,max_j) = (%d,%d)\n", j, shapes[i].mesh.indices.size()); //   / 100.f
 		//		vertices.push_back(glm::vec3(
-		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3]*5.f,
+		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3] * 5.f,
 		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] * 5.f,
 		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] * 5.f
 		//		));
@@ -167,7 +168,8 @@ void SetupScenes() {
 		//			));
 
 		//			//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname);
-		//		} else {
+		//		}
+		//		else {
 		//			// Assign texture to triangle
 		//			printf("vertex is coloured, no texture\n");
 		//			texture_ids.push_back(-1);
@@ -176,21 +178,40 @@ void SetupScenes() {
 		//	}
 		//}
 
-		////Entity e4(glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords, 10);
-		////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-		////scenes[1]->AddEntity(e4);
-
-		//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
-		//scenes[1]->groups.push_back(spaceship_model);
+		//EntityGroup spaceship_complex_model = EntityGroup(glm::vec3(25.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
+		//scenes[1]->groups.push_back(&spaceship_complex_model);
 	}
 
-	EntityGroup shield = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f));
-	scenes[1]->groups.push_back(shield);
+	//Entity ee(Entity::Model, glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords, 10);
+	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	//scenes[1]->AddEntity(ee);
 
-		//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
-		//scenes[1]->groups.push_back(spaceship_model);
+	
 
-	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
+	// Shield pieces
+	//EntityGroup shield = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f));
+	//scenes[1]->groups.push_back(shield);
+
+	// Spaceship
+	//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
+	//scenes[1]->groups.push_back(spaceship_model);
+
+	// Demo spaceship
+	Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.2f, 0.2f, 0.9f });
+	SpaceshipGroup* spaceship_model = new SpaceshipGroup(*e4);
+	scenes[1]->groups.push_back(spaceship_model);
+
+	// Demo enemy
+	Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, -5.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.9f, 0.2f, 0.2f });
+	SpaceshipGroup* enemy_spaceship_model = new SpaceshipGroup(*e5);
+	
+	std::vector<Weapon> enemy_weapons;
+	Weapon w1 = Weapon(glm::vec3(5.f, 0.f, 0.f), Weapon::Cannon, 0.2f);
+	enemy_weapons.push_back(w1);
+
+	enemy_spaceship_model->AddWeaponSystem(enemy_weapons, e4, scenes[1]);
+	
+	scenes[1]->groups.push_back(enemy_spaceship_model);
 }
 
 GLuint InitialiseShader(GLchar* vertex_source, GLchar* fragment_source) {

@@ -62,7 +62,9 @@
 #include "Vertex.h"
 #include "entity.h"
 #include "scene.h"
+#include "Weapon.h"
 #include "entitygroup.h"
+#include "SpaceshipGroup.h"
 //#include "stb_image.h"
 
 

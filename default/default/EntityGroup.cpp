@@ -1,59 +1,16 @@
 #include "entitygroup.h"
 
 EntityGroup::EntityGroup(Entity e) {
-	en = std::vector<Entity>();
+	init();
 	Add(e);
-	group_mov = glm::vec3(0.f, 0.f, 0.f);
-	current_ang_mom = glm::vec3(0.f, 0.f, 0.f);
-	total_ang_mom = glm::vec3(0.f, 0.f, 0.f);
-
 	centre = e.position;
-
-	// Animation
-	an_types = std::vector<GLuint>();
-	an_lengths = std::vector<GLuint>();
-	an_ang_mags = std::vector<GLfloat>();
-	an_ang_dirs = std::vector<glm::vec3>();
-
-	mom_angular_magnitude = 0.f;
-	mom_angular_direction = glm::vec3(0.f, 0.f, 0.f);
-
-	mom_movement = glm::vec3(0.f, 0.f, 0.f);
-
-
-	frame = 0;
-	animation = 0;
-
-	angle = glm::vec3(0.f, 0.f, 0.f);
 }
 
 EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 	std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords) {
-	
 
-	group_mov = glm::vec3(0.f, 0.f, 0.f);
-	current_ang_mom = glm::vec3(0.f, 0.f, 0.f);
-	total_ang_mom = glm::vec3(0.f, 0.f, 0.f);
+	init();
 
-	centre = p;
-	angle = a;
-
-	// Animation
-	an_types = std::vector<GLuint>();
-	an_lengths = std::vector<GLuint>();
-	an_ang_mags = std::vector<GLfloat>();
-	an_ang_dirs = std::vector<glm::vec3>();
-
-	mom_angular_magnitude = 0.f;
-	mom_angular_direction = glm::vec3(0.f, 0.f, 0.f);
-
-	mom_movement = glm::vec3(0.f, 0.f, 0.f);
-
-	frame = 0;
-	animation = 0;
-
-
-	en = std::vector<Entity>();
 	// Split this model into multiple entities, grouping by texture
 	std::set<GLuint> texture_id_set(texture_ids.begin(), texture_ids.end());
 	std::vector<GLuint> unique_texture_ids = std::vector<GLuint>();
@@ -79,20 +36,33 @@ EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 			}
 		}
 
-		Entity e = Entity(p, s, a, entity_vertices, this_texture);
+		Entity e = Entity(Entity::Model, p, s, a, entity_vertices, this_texture);
 		en.push_back(e);
 	}
-
-
-	
 }
 
-// Shield group
-EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a) {
+// Pre-defined groups
+EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a, Type t) {
+	init();
+
+	switch (t) {
+		case Shield: {
+			Entity shieldTrial = Entity(Entity::Shield, p, s, a, 100, false);
+			centre = shieldTrial.position;
+			Add(shieldTrial);
+		} break;
+	}
+}
+
+void EntityGroup::init() {
+
+	en = std::vector<Entity>();
+
 	group_mov = glm::vec3(0.f, 0.f, 0.f);
 	current_ang_mom = glm::vec3(0.f, 0.f, 0.f);
 	total_ang_mom = glm::vec3(0.f, 0.f, 0.f);
 
+	centre = glm::vec3(0.f, 0.f, 0.f);
 
 	// Animation
 	an_types = std::vector<GLuint>();
@@ -110,14 +80,6 @@ EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a) {
 	animation = 0;
 
 	angle = glm::vec3(0.f, 0.f, 0.f);
-
-	// Add shield parts
-	en = std::vector<Entity>();
-
-
-	Entity shieldTrial = Entity(Entity::Shield, p, s, a, 100, false);
-	centre = shieldTrial.position;
-	Add(shieldTrial);
 }
 
 void EntityGroup::Add(Entity e) {
@@ -243,3 +205,6 @@ void EntityGroup::Animate() {
 	//}
 }
 
+void EntityGroup::Update() {
+
+}

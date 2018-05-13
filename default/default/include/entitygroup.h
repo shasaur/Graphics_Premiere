@@ -2,12 +2,16 @@
 #define ENTITYGROUP_H
 
 #include "Entity.h"
+#include "Weapon.h"
 #include <set>
 
 
 class EntityGroup {
+	void init();
 
 public:
+	enum Type {Shield};
+
 	// BFix
 	std::vector<glm::vec3> original_pos, original_angle;
 	glm::vec3 group_mov;
@@ -30,11 +34,16 @@ public:
 	std::vector<Entity> en;
 	glm::vec3 centre;
 
+	// Constructors
 	EntityGroup(Entity e);
 	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords);
-	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a); // shield
+	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a, Type t); // shield
 
+	// Update logic
+	virtual void Update();
+
+	// Manipulation of entities
 	void Add(Entity e);
 	void Move(GLint type, GLint length, glm::vec3 mag);
 	void Rotate(GLint type, GLint length, GLfloat mag, glm::vec3 dir);

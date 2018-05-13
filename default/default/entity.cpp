@@ -1,6 +1,14 @@
 #include "entity.h"
 
+// Common attributes
+void Entity::init(Shape sh) {
+	moving = false;
+	shape = sh;
+}
+
 Entity::Entity(Shape sh) {
+	init(sh);
+
 	position = glm::vec3(0.f, 0.f, 0.f);
 	size = glm::vec3(1.f, 1.f, 1.f);
 	angle = glm::vec3(1.f, 1.f, 1.f);
@@ -23,9 +31,11 @@ Entity::Entity(Shape sh) {
 }
 
 // Model constructor
-Entity::Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a, 
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, 
 		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords,
 		GLuint texture_group) {
+	init(sh);
+
 	position = p;
 	size = s;
 	angle = a;
@@ -48,7 +58,9 @@ Entity::Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 	}
 }
 
-Entity::Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vertex> vertices, GLuint textureID) {
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vertex> vertices, GLuint textureID) {
+	init(sh);
+
 	position = p;
 	size = s;
 	angle = a;
@@ -63,6 +75,8 @@ Entity::Entity(glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vertex> vertic
 }
 
 Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, glm::vec3 colour) {
+	init(sh);
+
 	position = p;
 	size = s;
 	angle = a;
@@ -92,7 +106,9 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w,
 }
 
 
-Entity::Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, GLuint textureID, glm::vec3 colour) {
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, GLuint textureID, glm::vec3 colour) {
+	init(sh);
+
 	position = p;
 	size = s;
 	angle = a;
@@ -102,7 +118,7 @@ Entity::Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool
 	textured = true;
 	texID = textureID;
 
-	switch (shape) {
+	switch (sh) {
 	case Shape::Cone: {
 		CreateCone(glm::vec3(0.f, 0.f, 0.f), 2.f, { 0.f, 0.f, 1.f });
 		break; };
@@ -121,8 +137,9 @@ Entity::Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool
 	}
 }
 
-void Entity::SetVelocity(btVector3 newVel) {
-	vel = newVel;
+void Entity::SetVelocity(glm::vec3 v) {
+	vel = btVector3(v.x, v.y, v.z);
+	moving = true;
 }
 
 glm::vec2 getPolar(glm::vec3 v)
@@ -239,76 +256,79 @@ void Entity::CreateCube(bool wiremesh){
 
 void Entity::CreateShieldSphere(int n, bool wiremesh)
 {
-	int i = 25;
-	int j;
+	int i,j;
 	double theta1, theta2, theta3;
 	glm::vec3 e, p;
 
 	GLfloat r = 1.f;
 	// vertical
-	for (j = 0; j<n / 2; j++) {
+	// higher number means closer to the north of the sphere
+	for (j = 45; j<50; j++) {
 		theta1 = j * TWOPI / n - PID2;
 		theta2 = (j + 1) * TWOPI / n - PID2;
 
+		// horizontal
+		for (i = 0; i <= n; i++) {
 
-		theta3 = i * TWOPI / n;
+			theta3 = i * TWOPI / n;
 
-		// SIMPLIFY ALL OF THIS
+			// SIMPLIFY ALL OF THIS
 
-		Vertex v1;
-		setColour(v1, shape_colour);
-		setPosition(v1, r * cos(theta2) * cos(theta3), sin(theta2), r * cos(theta2) * sin(theta3));
-		setNormal(v1, v1.position[0], v1.position[1], v1.position[2]);
-		v1.uv = glm::vec2((atan2(v1.position[0], v1.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v1.position[1]) / 3.1415926 + 0.5));
+			Vertex v1;
+			setColour(v1, shape_colour);
+			setPosition(v1, r * cos(theta2) * cos(theta3), sin(theta2), r * cos(theta2) * sin(theta3));
+			setNormal(v1, v1.position[0], v1.position[1], v1.position[2]);
+			v1.uv = glm::vec2((atan2(v1.position[0], v1.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v1.position[1]) / 3.1415926 + 0.5));
 
-		e.x = cos(theta1) * cos(theta3);
-		e.y = sin(theta1);
-		e.z = cos(theta1) * sin(theta3);
+			e.x = cos(theta1) * cos(theta3);
+			e.y = sin(theta1);
+			e.z = cos(theta1) * sin(theta3);
 
-		Vertex v2;
-		setColour(v2, v1);
-		setPosition(v2, r * e.x, r * e.y, r * e.z);
-		setNormal(v2, v2.position[0], v2.position[1], v2.position[2]);
-		v2.uv = glm::vec2((atan2(v2.position[0], v2.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v2.position[1]) / 3.1415926 + 0.5));
-
-
-		theta3 = (i + 1) * TWOPI / n;
-
-		e.x = cos(theta2) * cos(theta3);
-		e.y = sin(theta2);
-		e.z = cos(theta2) * sin(theta3);
-
-		Vertex v3;
-		setColour(v3, v1);
-		setPosition(v3, r * e.x, r * e.y, r * e.z);
-		setNormal(v3, v3.position[0], v3.position[1], v3.position[2]);
-		v3.uv = glm::vec2((atan2(v3.position[0], v3.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v3.position[1]) / 3.1415926 + 0.5));
+			Vertex v2;
+			setColour(v2, v1);
+			setPosition(v2, r * e.x, r * e.y, r * e.z);
+			setNormal(v2, v2.position[0], v2.position[1], v2.position[2]);
+			v2.uv = glm::vec2((atan2(v2.position[0], v2.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v2.position[1]) / 3.1415926 + 0.5));
 
 
-		e.x = cos(theta1) * cos(theta3);
-		e.y = sin(theta1);
-		e.z = cos(theta1) * sin(theta3);
+			theta3 = (i + 1) * TWOPI / n;
 
-		Vertex v4;
-		setColour(v4, v1);
-		setPosition(v4, r * e.x, r * e.y, r * e.z);
-		setNormal(v4, v4.position[0], v4.position[1], v4.position[2]);
-		v4.uv = glm::vec2((atan2(v4.position[0], v4.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v4.position[1]) / 3.1415926 + 0.5));
+			e.x = cos(theta2) * cos(theta3);
+			e.y = sin(theta2);
+			e.z = cos(theta2) * sin(theta3);
 
-		if (wiremesh) {
-			push(v1);
-			push(v2);
-			push(v4);
-			push(v3);
-		}
-		else {
-			push(v1);
-			push(v2);
-			push(v3);
+			Vertex v3;
+			setColour(v3, v1);
+			setPosition(v3, r * e.x, r * e.y, r * e.z);
+			setNormal(v3, v3.position[0], v3.position[1], v3.position[2]);
+			v3.uv = glm::vec2((atan2(v3.position[0], v3.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v3.position[1]) / 3.1415926 + 0.5));
 
-			push(v2);
-			push(v3);
-			push(v4);
+
+			e.x = cos(theta1) * cos(theta3);
+			e.y = sin(theta1);
+			e.z = cos(theta1) * sin(theta3);
+
+			Vertex v4;
+			setColour(v4, v1);
+			setPosition(v4, r * e.x, r * e.y, r * e.z);
+			setNormal(v4, v4.position[0], v4.position[1], v4.position[2]);
+			v4.uv = glm::vec2((atan2(v4.position[0], v4.position[2]) / 3.1415926f + 1.0f) * 0.5, (asin(v4.position[1]) / 3.1415926 + 0.5));
+
+			if (wiremesh) {
+				push(v1);
+				push(v2);
+				push(v4);
+				push(v3);
+			}
+			else {
+				push(v1);
+				push(v2);
+				push(v3);
+
+				push(v2);
+				push(v3);
+				push(v4);
+			}
 		}
 	}
 }

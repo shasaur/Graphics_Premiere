@@ -20,7 +20,8 @@
 #include "entitygroup.h"
 
 class Scene {
-	std::vector<Entity> en;
+	std::vector<Entity> entities;
+	std::vector<Entity> pr;
 
 	glm::vec3 cameraAngle;
 	glm::vec3 cameraRotation;
@@ -43,12 +44,12 @@ class Scene {
 	btSequentialImpulseConstraintSolver* solver;
 	btDiscreteDynamicsWorld* dynamicsWorld;
 
-	std::vector<btRigidBody*> MovingBits; // so that can get at all bits
+	std::vector<btRigidBody*> bulletEntityBodies; // so that can get at all bits
+	std::vector<btRigidBody*> bulletProjectileBodies; // so that can get at all bits
 	std::vector<btRigidBody*> StaticBits; // especially during clean up.
 
 public:
-	std::vector<Vertex> v;
-	std::vector<EntityGroup> groups;
+	std::vector<EntityGroup*> groups;
 
 	Scene::Scene();
 	Scene::Scene(glm::vec3 cam);
@@ -59,7 +60,7 @@ public:
 	void Rotate(glm::vec3 rot);
 
 	void AddEntity(Entity e);
-	void AddEntities(Entity* e, int n);
+	void AddProjectile(Entity e);
 	void AddGroups(EntityGroup* e, int n);
 	
 	void SetBackground(glm::vec3 background);
@@ -69,9 +70,9 @@ public:
 	void DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 View, Entity& e);
 
 	// Bullet
-	void Scene::SetupPhysics();
-	void Scene::UpdatePhysics();
-	void Scene::DestructPhysics();
+	void SetupPhysics();
+	void UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects);
+	void DestructPhysics();
 
 	btRigidBody* Scene::SetSphere(float size, btTransform T, btVector3 velocity);
 	btRigidBody* Scene::SetCube(float size, btTransform T, btVector3 velocity);
