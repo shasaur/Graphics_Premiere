@@ -1,6 +1,7 @@
 #pragma once
 #include "entitygroup.h"
 #include "scene.h"
+#include "Projectile.h"
 
 class SpaceshipGroup : public EntityGroup
 {

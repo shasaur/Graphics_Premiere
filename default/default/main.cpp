@@ -101,12 +101,12 @@ void SetupScenes() {
 	scenes[1] = new Scene();//glm::vec3(0.f, 0.f, -15.f));
 	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
 
-	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, false, saturn_texture, { 1.f, 1.f, 1.f });
-	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, saturn_texture, { 1.f, 1.f, 1.f });
+	e2.SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	scenes[1]->AddEntity(e2);
 
-	Entity e3(Entity::Sphere, glm::vec3(175.f, 50.f, -250.f), glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.f, 0.f, 0.f), 100, false, titan_texture, { 1.f, 1.f, 1.f });
-	//e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
+	Entity e3(Entity::Sphere, glm::vec3(175.f, 50.f, -250.f), glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.f, 0.f, 0.f), 100, titan_texture, { 1.f, 1.f, 1.f });
+	e3.SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	scenes[1]->AddEntity(e3);
 
 	//Entity e4(Entity::Sphere, glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.5f, 0.5f, 1.0f });
@@ -186,23 +186,20 @@ void SetupScenes() {
 	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
 	//scenes[1]->AddEntity(ee);
 
-	
-
-	// Shield pieces
-	//EntityGroup shield = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f));
-	//scenes[1]->groups.push_back(shield);
 
 	// Spaceship
 	//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
 	//scenes[1]->groups.push_back(spaceship_model);
 
 	// Demo spaceship
-	Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.2f, 0.2f, 0.9f });
-	SpaceshipGroup* spaceship_model = new SpaceshipGroup(*e4);
-	scenes[1]->groups.push_back(spaceship_model);
+	Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, { 0.2f, 0.2f, 0.9f });
+	e4->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	//SpaceshipGroup* spaceship_model = new SpaceshipGroup(*e4);
+	scenes[1]->AddEntity(*e4);
 
 	// Demo enemy
-	Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, -5.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.9f, 0.2f, 0.2f });
+	Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, -5.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, { 0.9f, 0.2f, 0.2f });
+	e5->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	SpaceshipGroup* enemy_spaceship_model = new SpaceshipGroup(*e5);
 	
 	std::vector<Weapon> enemy_weapons;

@@ -12,8 +12,8 @@ void SpaceshipGroup::AddWeaponSystem(std::vector<Weapon> w, Entity* t, Scene* s)
 	for (int i = 0; i < w.size(); i++) {
 		w.at(i).position += centre;
 		weapons.push_back(w.at(i));
-		printf("\ncentre (%f,%f,%f)\n", centre.x, centre.y, centre.z);
-		printf("weapon pos (%f,%f,%f)\n", w.at(i).position.x, w.at(i).position.y, w.at(i).position.z);
+		//printf("\ncentre (%f,%f,%f)\n", centre.x, centre.y, centre.z);
+		//printf("weapon pos (%f,%f,%f)\n", w.at(i).position.x, w.at(i).position.y, w.at(i).position.z);
 	}
 	weapon_target = t;
 	spawn_scene = s;
@@ -28,14 +28,16 @@ void SpaceshipGroup::FireWeapons() {
 		float fire_probability = (float)(rand() % 100) / 100.f;
 
 		if (fire_probability <= fire_threshold) {
-			Entity projectile(Entity::Sphere, weapons.at(w).position, glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), 20, false, { 1.f, 0.5f, 1.f });
-			
-			double offset_amplifier = 2.0;
+			double offset_amplifier = 1.0;
 			glm::dvec3 randomOffset((((rand() % 100) / 100.f)*weapon_target->size.x*offset_amplifier) - (weapon_target->size.x / 2.0),
-									(((rand() % 100) / 100.f)*weapon_target->size.y*offset_amplifier) - (weapon_target->size.y / 2.0),
-									(((rand() % 100) / 100.f)*weapon_target->size.z*offset_amplifier) - (weapon_target->size.z / 2.0));
-			projectile.SetVelocity((weapon_target->position+randomOffset) - glm::dvec3(weapons.at(w).position));
+				(((rand() % 100) / 100.f)*weapon_target->size.y*offset_amplifier) - (weapon_target->size.y / 2.0),
+				(((rand() % 100) / 100.f)*weapon_target->size.z*offset_amplifier) - (weapon_target->size.z / 2.0));
+			glm::dvec3 vel = (weapon_target->position + randomOffset) - glm::dvec3(weapons.at(w).position);
+
+			Projectile projectile(weapon_target->position, weapons.at(w).position, glm::vec3(0.5f, 0.5f, 0.5f), glm::vec3(0.f, 0.f, 0.f), vel, { 1.f, 0.5f, 1.f });
+			projectile.SetVelocity(vel, Entity::Dynamic);
 			spawn_scene->AddProjectile(projectile);
+
 			printf("fire\n");
 		}
 	}

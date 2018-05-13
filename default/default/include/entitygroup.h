@@ -10,6 +10,11 @@ class EntityGroup {
 	void init();
 
 public:
+	int SHIELD_SPHERE_DETAIL = 200;
+	int SHIELD_RIPPLE_DETAIL = 10;
+
+	int STEP_SIZE = (SHIELD_SPHERE_DETAIL / 2) / SHIELD_RIPPLE_DETAIL;
+
 	enum Type {Shield};
 
 	// BFix
@@ -38,10 +43,11 @@ public:
 	EntityGroup(Entity e);
 	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords);
-	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a, Type t); // shield
+	EntityGroup(Type t, glm::vec3 p, glm::vec3 s, glm::vec3 a); // shield
 
 	// Update logic
 	virtual void Update();
+	virtual std::vector<Entity*> Render();
 
 	// Manipulation of entities
 	void Add(Entity e);

@@ -2,7 +2,7 @@
 
 // Common attributes
 void Entity::init(Shape sh) {
-	moving = false;
+	moving = None;
 	shape = sh;
 }
 
@@ -74,7 +74,7 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vert
 	}
 }
 
-Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, glm::vec3 colour) {
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, glm::vec3 colour) {
 	init(sh);
 
 	position = p;
@@ -83,7 +83,7 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w,
 	shape_colour = colour;
 	shape = sh;
 
-	wiremesh = w;
+	wiremesh = false;
 	textured = false;
 
 	switch (sh) {
@@ -91,22 +91,40 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w,
 		CreateCone(glm::vec3(0.f, 0.f, 0.f), 2.f, { 0.f, 0.f, 1.f });
 		break; };
 	case Shape::Cube: {
-		CreateCube(w);
+		CreateCube(wiremesh);
 		break; };
 	case Shape::Cylinder:{
 		CreateCylinder(true);
 		break; };
 	case Shape::Sphere:{
-		CreateSimpleSphere(res, w);
+		CreateSimpleSphere(res, wiremesh);
 		break; };
+	default: printf("Error: No such entity type!"); break;
+	}
+}
+
+// Shield Entity
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, int start, int end, glm::vec3 colour) {
+	init(sh);
+
+	position = p;
+	size = s;
+	angle = a;
+	shape_colour = colour;
+	shape = sh;
+
+	wiremesh = false;
+	textured = false;
+
+	switch (sh) {
 	case Shape::Shield: {
-		CreateShieldSphere(res, w);
+		CreateShieldSphere(res, start, end);
 		break; };
 	}
 }
 
 
-Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w, GLuint textureID, glm::vec3 colour) {
+Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, GLuint textureID, glm::vec3 colour) {
 	init(sh);
 
 	position = p;
@@ -114,7 +132,7 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w,
 	angle = a;
 	shape_colour = colour;
 
-	wiremesh = w;
+	wiremesh = false;
 	textured = true;
 	texID = textureID;
 
@@ -123,23 +141,22 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, bool w,
 		CreateCone(glm::vec3(0.f, 0.f, 0.f), 2.f, { 0.f, 0.f, 1.f });
 		break; };
 	case Shape::Cube: {
-		CreateCube(w);
+		CreateCube(wiremesh);
 		break; };
 	case Shape::Cylinder: {
 		CreateCylinder(true);
 		break; };
 	case Shape::Sphere: {
-		CreateSimpleSphere(res, w);
+		CreateSimpleSphere(res, wiremesh);
 		break; };
-	case Shape::Shield: {
-		CreateShieldSphere(res, w);
-		break; };
+
+	default: printf("Error: No such entity type!"); break;
 	}
 }
 
-void Entity::SetVelocity(glm::vec3 v) {
+void Entity::SetVelocity(glm::vec3 v, Movement m) {
 	vel = btVector3(v.x, v.y, v.z);
-	moving = true;
+	moving = m;
 }
 
 glm::vec2 getPolar(glm::vec3 v)
@@ -254,7 +271,7 @@ void Entity::CreateCube(bool wiremesh){
 	}
 }
 
-void Entity::CreateShieldSphere(int n, bool wiremesh)
+void Entity::CreateShieldSphere(int n, int start, int end)
 {
 	int i,j;
 	double theta1, theta2, theta3;
@@ -263,7 +280,7 @@ void Entity::CreateShieldSphere(int n, bool wiremesh)
 	GLfloat r = 1.f;
 	// vertical
 	// higher number means closer to the north of the sphere
-	for (j = 45; j<50; j++) {
+	for (j = start; j<end; j++) {
 		theta1 = j * TWOPI / n - PID2;
 		theta2 = (j + 1) * TWOPI / n - PID2;
 

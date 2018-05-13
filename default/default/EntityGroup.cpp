@@ -42,14 +42,35 @@ EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 }
 
 // Pre-defined groups
-EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a, Type t) {
+EntityGroup::EntityGroup(Type t, glm::vec3 p, glm::vec3 s, glm::vec3 a) {
 	init();
 
 	switch (t) {
 		case Shield: {
-			Entity shieldTrial = Entity(Entity::Shield, p, s, a, 100, false);
-			centre = shieldTrial.position;
-			Add(shieldTrial);
+
+			int rows = (SHIELD_SPHERE_DETAIL / 4);
+
+			bool stop = false;
+			for (int i = 0; i < SHIELD_RIPPLE_DETAIL; i++) {
+				int i0, i1;
+				i0 = ((1.f / (float)(i + 1)) * 2.f) * ((float)rows/2.f);
+
+				int j = i + 1;
+				i1 = ((1.f / (float)(j + 1)) * 2.f) * ((float)rows / 2.f);
+
+				if (i1 == i0)
+					stop = true;
+
+				if (stop)
+					i0 = i1;
+
+				//i1 = ((j+1) * STEP_SIZE) - ((STEP_SIZE * 10.f * ((float)(j - 1) / (float)SHIELD_RIPPLE_DETAIL)) - STEP_SIZE);
+
+				Entity shieldTrial = Entity(Entity::Shield, p, s, a, SHIELD_SPHERE_DETAIL, rows-i0, rows-i1, glm::vec3(0.6f, 0.6f, 0.6f));
+				centre = shieldTrial.position;
+				Add(shieldTrial);
+			}
+			
 		} break;
 	}
 }
@@ -83,6 +104,7 @@ void EntityGroup::init() {
 }
 
 void EntityGroup::Add(Entity e) {
+	e.SetupGeometry();
 	en.push_back(e);
 	original_pos.push_back(e.position);
 	original_angle.push_back(e.angle);
@@ -207,4 +229,14 @@ void EntityGroup::Animate() {
 
 void EntityGroup::Update() {
 
+}
+
+std::vector<Entity*> EntityGroup::Render() {
+	std::vector<Entity*> entitiesToDraw = std::vector<Entity*>();
+
+	for (int i = 0; i < en.size(); i++) {
+		entitiesToDraw.push_back(&en.at(i));
+	}
+
+	return entitiesToDraw;
 }

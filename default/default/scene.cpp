@@ -12,7 +12,7 @@ Scene::Scene() {
 	frame = 0;
 	SetupPhysics();  	// set up physics
 
-	pr = std::vector<Entity>();
+	pr = std::vector<Projectile>();
 }
 
 //Scene::Scene(glm::vec3 cam) {
@@ -41,21 +41,21 @@ void Scene::AddEntity(Entity e) {
 	e.SetupGeometry();
 	entities.push_back(e);
 
-	if (e.moving) {
+	if (e.moving != Entity::None) {
 		if (e.shape == Entity::Sphere)
-			bulletEntityBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel)); // last one is velocity
+			bulletEntityBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel, e.moving)); // last one is velocity
 		else
 			bulletEntityBodies.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel));
 	}
 
 }
 
-void Scene::AddProjectile(Entity e) {
+void Scene::AddProjectile(Projectile e) {
 	e.SetupGeometry();
 	pr.push_back(e);
 
 	if (e.shape == Entity::Sphere)
-		bulletProjectileBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel)); // last one is velocity
+		bulletProjectileBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel, e.moving)); // last one is velocity
 	else
 		bulletProjectileBodies.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel));
 }
@@ -123,7 +123,30 @@ void Scene::SetupPhysics() {
 }
 
 void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects) {
-	printf("No of moving bodies (%d) vs No of projectiles(%d)\n", bodies.size(), pr.size());
+	for (int i = 0; i < bodies.size(); i++) {
+		btTransform trans;
+		btRigidBody* moveRigidBody = bodies[i];
+		moveRigidBody->getMotionState()->getWorldTransform(trans);
+
+		//printf("%f, %f, %f\n", position.x, position.y, position.z);
+		glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+		//btVector3 a = moveRigidBody->getAngularFactor();
+
+		btQuaternion a = moveRigidBody->getCenterOfMassTransform().getRotation();
+		glm::vec3 an = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+		float theta = moveRigidBody->getCenterOfMassTransform().getRotation().getAngle();
+
+		//printf("%f, %f, %f\n", an.x, an.y, 0);
+		//glm::mat4 btMat = glm::mat4(trans)
+		//btMat.getRotation(trans.getRotation())
+
+		objects->at(i).position = position;
+		objects->at(i).angle = an;
+		objects->at(i).theta = theta;
+	}
+}
+
+void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Projectile>* objects) {
 	for (int i = 0; i < bodies.size(); i++) {
 		btTransform trans;
 		btRigidBody* moveRigidBody;
@@ -168,10 +191,10 @@ void Scene::DestructPhysics() {
 
 // BULLET PHYSICS START //
 
-btRigidBody* Scene::SetSphere(float size, btTransform T, btVector3 velocity) {
+btRigidBody* Scene::SetSphere(float size, btTransform T, btVector3 velocity, Entity::Movement fixed) {
 	btCollisionShape* fallshape = new btSphereShape(size);
 	btDefaultMotionState* fallMotionState = new btDefaultMotionState(T);
-	btScalar mass = 1;
+	btScalar mass = fixed == Entity::Dynamic ? 1 : 0;
 	btVector3 fallInertia(0, 0, 0);
 	fallshape->calculateLocalInertia(mass, fallInertia);
 	btRigidBody::btRigidBodyConstructionInfo fallRigidBodyCI(mass, fallMotionState, fallshape, fallInertia);
@@ -218,7 +241,11 @@ void Scene::setWall(btDiscreteDynamicsWorld* world, btVector3 side, double dista
 // BULLET PHYSICS END //
 
 
-
+void Scene::SpawnShield(glm::vec3 centre, glm::vec3 hitPoint) {
+	// Shield pieces
+	ShieldGroup* shield = new ShieldGroup(EntityGroup::Shield, centre, glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.5f, 0.f, 0.f));
+	groups.push_back(shield);
+}
 
 
 void Scene::Update(GLint screenID) {
@@ -227,6 +254,31 @@ void Scene::Update(GLint screenID) {
 
 	UpdatePhysics(bulletEntityBodies, &entities);
 	UpdatePhysics(bulletProjectileBodies, &pr);
+
+	for (int i = 0; i < pr.size(); i++) {
+		btTransform trans;
+		btRigidBody* moveRigidBody = bulletProjectileBodies[i];
+		moveRigidBody->getMotionState()->getWorldTransform(trans);
+
+		// Get current velocity of projectile
+		btVector3 current_vel = moveRigidBody->getLinearVelocity();
+		glm::vec3 current_vel_glm = glm::vec3(current_vel.getX(), current_vel.getY(), current_vel.getZ());
+
+
+		if (pr.at(i).inTargetRange(current_vel_glm)) {
+			printf("collision!");
+
+			// Get current position of impact
+			glm::vec3 position = glm::vec3(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+
+			SpawnShield(pr.at(i).target_pos, position);
+
+			// remove projectile, i--
+			pr.erase(pr.begin() + i);
+			bulletProjectileBodies.erase(bulletProjectileBodies.begin() + i);
+			i--;
+		}
+	}
 
 	//for (int i = 0; i < en.size(); i++) {
 	//	if (screenID == 2) {
@@ -333,8 +385,17 @@ void Scene::Render(GLuint shaderprogram, GLuint vao) {
 
 	for (int g = 0; g < groups.size(); g++) {
 		groups.at(g)->Update();
-		for (int i = 0; i < groups.at(g)->en.size(); i++) {
-			DrawEntity(shaderprogram, Projection, View, groups.at(g)->en.at(i));
+		std::vector<Entity*> entitiesToDraw = groups.at(g)->Render();
+		
+		// If this Shield group has ticked out, remove it
+		if (entitiesToDraw.size() > 0 && entitiesToDraw.at(0) == nullptr) {
+			groups.erase(groups.begin() + g);
+			g--;
+		}
+		else {
+			for (int i = 0; i < entitiesToDraw.size(); i++) {
+				DrawEntity(shaderprogram, Projection, View, *entitiesToDraw.at(i));
+			}
 		}
 	}
 

@@ -18,10 +18,12 @@
 #include "Vertex.h"
 #include "entity.h"
 #include "entitygroup.h"
+#include "Projectile.h"
+#include "ShieldGroup.h"
 
 class Scene {
 	std::vector<Entity> entities;
-	std::vector<Entity> pr;
+	std::vector<Projectile> pr;
 
 	glm::vec3 cameraAngle;
 	glm::vec3 cameraRotation;
@@ -60,7 +62,7 @@ public:
 	void Rotate(glm::vec3 rot);
 
 	void AddEntity(Entity e);
-	void AddProjectile(Entity e);
+	void AddProjectile(Projectile e);
 	void AddGroups(EntityGroup* e, int n);
 	
 	void SetBackground(glm::vec3 background);
@@ -72,11 +74,14 @@ public:
 	// Bullet
 	void SetupPhysics();
 	void UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects);
+	void UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Projectile>* objects);
 	void DestructPhysics();
 
-	btRigidBody* Scene::SetSphere(float size, btTransform T, btVector3 velocity);
-	btRigidBody* Scene::SetCube(float size, btTransform T, btVector3 velocity);
-	void Scene::setWall(btDiscreteDynamicsWorld* world, btVector3 side, double distanceFromCenter);
+	btRigidBody* SetSphere(float size, btTransform T, btVector3 velocity, Entity::Movement fixed);
+	btRigidBody* SetCube(float size, btTransform T, btVector3 velocity);
+	void setWall(btDiscreteDynamicsWorld* world, btVector3 side, double distanceFromCenter);
+
+	void SpawnShield(glm::vec3 centre, glm::vec3 hitPoint);
 };
 
 #endif /* SCENE_H */
