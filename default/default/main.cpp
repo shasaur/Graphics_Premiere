@@ -14,7 +14,7 @@ int current_scene = 0;
 
 float speed = 0.1f;
 
-GLuint default_texture, sun_texture, mars_texture, saturn_texture, titan_texture, no_texture, space_texture;
+GLuint default_texture, sun_texture, saturn_texture, titan_texture, no_texture, space_texture;
 //std::map<std::string, GLuint> texture_map;
 
 ///*
@@ -246,19 +246,19 @@ void SetupScenes() {
 
 
 	// Add camera movement
-	Scene::CameraAction a1;
-	float* mov = new float[3]{ 400.f, 0.002f, 0.f }; float* startPoint = new float[2]{ 1.5f, 0.f };
-	a1.type = Scene::Orbit; a1.target = e2; a1.direction = glm::vec3(0.f, 0.f, 0.f); a1.amount = mov; a1.startPoint = startPoint; a1.currentTicks = 0; a1.totalTicks = 1000;
-	scenes[1]->tour.push_back(a1);
+	//Scene::CameraAction a1;
+	//float* mov = new float[3]{ 400.f, 0.002f, 0.f }; float* startPoint = new float[2]{ 1.5f, 0.f };
+	//a1.type = Scene::Orbit; a1.target = e2; a1.direction = glm::vec3(0.f, 0.f, 0.f); a1.amount = mov; a1.startPoint = startPoint; a1.currentTicks = 0; a1.totalTicks = 1000;
+	//scenes[1]->tour.push_back(a1);
 
-	Scene::CameraAction a3;
-	float* mov3 = new float[3]{ 0.f, -0.03f, 0.04f }; float* startPoint3 = new float[3]{ -10.f, -15.f, -30.f };
-	a3.type = Scene::Lerp; a3.target = nullptr; a3.direction = glm::vec3(0.0f, -0.5f, 0.f); a3.amount = mov3; a3.startPoint = startPoint3; a3.currentTicks = 0; a3.totalTicks = 1200;
-	scenes[1]->tour.push_back(a3);
+	//Scene::CameraAction a3;
+	//float* mov3 = new float[3]{ 0.f, -0.0375f, 0.05f }; float* startPoint3 = new float[3]{ -10.f, -15.f, -30.f };
+	//a3.type = Scene::Lerp; a3.target = nullptr; a3.direction = glm::vec3(0.0f, -0.5f, 0.f); a3.amount = mov3; a3.startPoint = startPoint3; a3.currentTicks = 0; a3.totalTicks = 900;
+	//scenes[1]->tour.push_back(a3);
 
 	Scene::CameraAction a2;
-	float* mov2 = new float[3]{ 15.f, -0.02f, 0.f }; float* startPoint2 = new float[2]{ -3.14f, 0.5f };
-	a2.type = Scene::Orbit; a2.target = &complex_spaceship_model->en.at(0); a2.direction = glm::vec3(0.2f, 4.14f, 0.f); a2.amount = mov2; a2.startPoint = startPoint2; a2.currentTicks = 0; a2.totalTicks = 800;
+	float* mov2 = new float[3]{ 15.f, -0.003f, 0.f }; float* startPoint2 = new float[2]{ -6.00f, 0.5f };
+	a2.type = Scene::Orbit; a2.target = &complex_spaceship_model->en.at(0); a2.direction = glm::vec3(0.2f, 4.14f, 0.f); a2.amount = mov2; a2.startPoint = startPoint2; a2.currentTicks = 0; a2.totalTicks = 600;
 	scenes[1]->tour.push_back(a2);
 }
 
@@ -416,7 +416,6 @@ int main() {
 	default_texture = loadTexture("textures/default.jpg");
 	sun_texture = loadTexture("textures/4k_sun.jpg");
 	saturn_texture = loadTexture("textures/4k_saturn.jpg");
-	mars_texture = loadTexture("textures/mars.jpg");
 	titan_texture = loadTexture("textures/4k_titan.jpg");
 	space_texture = loadTexture("textures/space_2.jpg");
 	//texture_map.insert(std::make_pair("default", default_texture));
@@ -441,6 +440,8 @@ int main() {
 	//scenes[2]->Rotate(glm::vec3(0.01f, 0.f, 0.f));
 
 	while (!glfwWindowShouldClose(window)) {  // Main loop
+		// start clock for this tick
+		auto start = std::chrono::high_resolution_clock::now();
 
 		// Update scene
 		scenes[current_scene]->Update(current_scene);
@@ -450,6 +451,13 @@ int main() {
 		glfwSwapBuffers(window);        // Swap front and back rendering buffers
 		glfwPollEvents();         // Poll for events.
 
+		// stop clock
+		auto finish = std::chrono::high_resolution_clock::now();
+		int ms = float(std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count());
+		long newWait = 10 - ms;// -(gm.gameSpeed);
+		newWait = newWait < 0 ? 0 : newWait;
+		// throttle the graphics loop to cap at a certain fps
+		std::this_thread::sleep_for(std::chrono::milliseconds(newWait));
 	}
 
 	glfwTerminate();  // Close window and terminate GLFW
