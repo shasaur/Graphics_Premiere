@@ -162,11 +162,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="bstrlib.c" />
     <ClCompile Include="entity.cpp" />
     <ClCompile Include="EntityGroup.cpp" />
-    <ClCompile Include="glslprogram.cpp" />
-    <ClCompile Include="glsw.c" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btAxisSweep3.cpp" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btBroadphaseProxy.cpp" />
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btCollisionAlgorithm.cpp" />
@@ -311,11 +308,11 @@
     <ClCompile Include="include\bullet_include_only_one\bullet_basic\LinearMath\btVector3.cpp" />
     <ClCompile Include="include\tiny_object_loader\tiny_obj_loader.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PT3.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="MatInfo.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="scene.cpp" />
+    <ClCompile Include="ShieldGroup.cpp" />
+    <ClCompile Include="SpaceshipGroup.cpp" />
     <ClCompile Include="tiny_mesh.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -326,10 +323,9 @@
     </ClCompile>
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="Vertex.cpp" />
-    <ClCompile Include="vertexbufferobject.cpp" />
+    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\bstrlib.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletCollisionCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\btBulletDynamicsCommon.h" />
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\BulletCollision\BroadphaseCollision\btAxisSweep3.h" />
@@ -553,8 +549,6 @@
     <ClInclude Include="include\bullet_include_only_one\bullet_basic\LinearMath\btVector3.h" />
     <ClInclude Include="include\entity.h" />
     <ClInclude Include="include\entitygroup.h" />
-    <ClInclude Include="include\glslprogram.h" />
-    <ClInclude Include="include\glsw.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\eglew.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\glew.h" />
     <ClInclude Include="include\gl\glew\glew-2.1.0\include\GL\glxew.h" />
@@ -563,29 +557,21 @@
     <ClInclude Include="include\gl\glfw\glfw-3.2.1.bin.WIN32\include\GLFW\glfw3native.h" />
     <ClInclude Include="include\gl\glfw\glfw-3.2.1.bin.WIN64\include\GLFW\glfw3.h" />
     <ClInclude Include="include\gl\glfw\glfw-3.2.1.bin.WIN64\include\GLFW\glfw3native.h" />
-    <ClInclude Include="include\imconfig.h" />
-    <ClInclude Include="include\imgui.h" />
-    <ClInclude Include="include\imgui_impl_glfw_gl3.h" />
-    <ClInclude Include="include\imgui_internal.h" />
-    <ClInclude Include="include\imgui_orient.h" />
     <ClInclude Include="include\main.h" />
     <ClInclude Include="include\scene.h" />
-    <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
     <ClInclude Include="include\stb_image\stb_image_resize.h" />
     <ClInclude Include="include\stb_image\stb_image_write.h" />
     <ClInclude Include="include\stb_image\stb_perlin.h" />
-    <ClInclude Include="include\stb_image_resize.h" />
-    <ClInclude Include="include\stb_image_write.h" />
-    <ClInclude Include="include\stb_perlin.h" />
-    <ClInclude Include="include\stb_rect_pack.h" />
-    <ClInclude Include="include\stb_textedit.h" />
-    <ClInclude Include="include\stb_truetype.h" />
     <ClInclude Include="include\tiny_object_loader\tiny_obj_loader.h" />
     <ClInclude Include="include\utils.h" />
     <ClInclude Include="include\Vertex.h" />
-    <ClInclude Include="include\vertexbufferobject.h" />
     <ClInclude Include="include\World.h" />
+    <ClInclude Include="MatInfo.h" />
+    <ClInclude Include="Projectile.h" />
+    <ClInclude Include="ShieldGroup.h" />
+    <ClInclude Include="SpaceshipGroup.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="box.frag" />

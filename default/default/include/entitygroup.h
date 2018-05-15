@@ -3,6 +3,7 @@
 
 #include "Entity.h"
 #include "Weapon.h"
+#include "MatInfo.h"
 #include <set>
 
 
@@ -41,7 +42,7 @@ public:
 
 	// Constructors
 	EntityGroup(Entity e);
-	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
+	EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a, std::map<GLuint, MatInfo>,
 		std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords);
 	EntityGroup(Type t, glm::vec3 p, glm::vec3 s, glm::vec3 a); // shield
 

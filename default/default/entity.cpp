@@ -5,21 +5,21 @@ void Entity::init(Shape sh) {
 	moving = None;
 	shape = sh;
 
-	GLuint vao = NULL, vbo = NULL;
-	GLuint texID = NULL;
+	vao = NULL, vbo = NULL;
+	texID = NULL;
 
-	glm::dvec3 position(0.,0.,0.);
-	glm::vec3 size(1.f,1.f,1.f);
-	btVector3 vel(0.f,0.f,0.f);
+	position = glm::vec3(0.,0.,0.);
+	size = glm::vec3(1.f,1.f,1.f);
+	vel = btVector3(0.f,0.f,0.f);
 
-	glm::vec3 angle(0.f,0.f,0.f);
-	float theta = 0;
+	angle = glm::vec3(0.f,0.f,0.f);
+	theta = 0;
 
-	glm::vec3 shape_colour(1.f, 1.f, 1.f);
+	shape_colour = glm::vec3(1.f, 1.f, 1.f);
 
-	bool wiremesh = false, textured = false;
+	wiremesh = false, textured = false;
 
-	std::vector<Vertex> v = std::vector<Vertex>();
+	v = std::vector<Vertex>();
 }
 
 Entity::Entity(Shape sh, GLuint textureID) {
@@ -79,6 +79,7 @@ Entity::Entity(Shape sh, glm::vec3 p, glm::vec3 s, glm::vec3 a, std::vector<Vert
 	position = p;
 	size = s;
 	angle = a;
+	//shape_colour = { vertices.at(0).color.x, vertices.at(0).color.y, vertices.at(0).color.z };
 
 	wiremesh = false;
 	textured = true;

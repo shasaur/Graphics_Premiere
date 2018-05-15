@@ -6,7 +6,7 @@ EntityGroup::EntityGroup(Entity e) {
 	centre = e.position;
 }
 
-EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
+EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a, std::map<GLuint, MatInfo> matMap,
 	std::vector<glm::vec3> vertices, std::vector<glm::vec3> normals, std::vector<GLuint> texture_ids, std::vector<glm::vec2> texture_coords) {
 
 	init();
@@ -15,28 +15,31 @@ EntityGroup::EntityGroup(glm::vec3 p, glm::vec3 s, glm::vec3 a,
 	std::set<GLuint> texture_id_set(texture_ids.begin(), texture_ids.end());
 	std::vector<GLuint> unique_texture_ids = std::vector<GLuint>();
 	unique_texture_ids.assign(texture_id_set.begin(), texture_id_set.end());
-	for (int i = 0; i < unique_texture_ids.size(); i++) {
 
-		GLuint this_texture = unique_texture_ids.at(i);
+	for (int j = 0; j < unique_texture_ids.size(); j++) {
+		int index = unique_texture_ids.at(j);
+		GLuint actual_texture_id = matMap.at(index).textId;
 
 		std::vector<Vertex> entity_vertices;
 
 		// Add every vertex that belong to a particular texture
 		for (int i = 0; i < vertices.size(); i++) {
-			if (texture_ids.at(i) == this_texture) {
+			if (texture_ids.at(i) == index) {
 				Vertex vert;
 
 				setPosition(vert, vertices.at(i).x, vertices.at(i).y, vertices.at(i).z); //vertex: width x height x length (set to 0.0 for a circle (flat), >= 1.0 for a cone)
 				setNormal(vert, vert.position[0], vert.position[1], vert.position[2]);
-				setColour(vert, glm::vec3(1.f, 1.f, 1.f));
-				vert.textureID = texture_ids.at(i);
+				setColour(vert, matMap.at(index).colour);
+				vert.textureID = actual_texture_id;
 				vert.uv = texture_coords.at(i);
 
 				entity_vertices.push_back(vert);
 			}
 		}
 
-		Entity e = Entity(Entity::Model, p, s, a, entity_vertices, this_texture);
+		//Entity(Shape shape, glm::vec3 p, glm::vec3 s, glm::vec3 a, int res, GLuint textureID, glm::vec3 colour); // textured entity
+		Entity e = Entity(Entity::Model, p, s, a, entity_vertices, actual_texture_id);
+		e.SetupGeometry();
 		en.push_back(e);
 	}
 }
@@ -66,7 +69,7 @@ EntityGroup::EntityGroup(Type t, glm::vec3 p, glm::vec3 s, glm::vec3 a) {
 
 				//i1 = ((j+1) * STEP_SIZE) - ((STEP_SIZE * 10.f * ((float)(j - 1) / (float)SHIELD_RIPPLE_DETAIL)) - STEP_SIZE);
 
-				Entity shieldTrial = Entity(Entity::Shield, p, s, a, SHIELD_SPHERE_DETAIL, rows-i0, rows-i1, glm::vec3(0.6f, 0.6f, 0.6f));
+				Entity shieldTrial = Entity(Entity::Shield, p, s, a, SHIELD_SPHERE_DETAIL, rows-i0, rows-i1, glm::vec3(0.1f, 0.36f, 1.0f));
 				centre = shieldTrial.position;
 				Add(shieldTrial);
 			}

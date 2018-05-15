@@ -7,26 +7,6 @@
 #pragma comment(linker, "/STACK:2000000000")
 #pragma comment(linker, "/HEAP:2000000000")
 
-//////////////////////////////////////////////////////////
-// setup created by Alex Everett						//
-//														//
-// this solution will create a visual studio project	//
-// with all the includes pointed correctly and relative	//
-// to the project										//
-//														//
-// this includes:	GLFW, GLEW,							//
-//					GLM,								//
-//					Bullet,								//
-//					tiny_obj_loader,					//
-//					stb_image.							//
-//														//
-// this will compile bullet into the program so to get	//
-// around linking a libs								//
-//														//
-// only tested for x64									//
-///////////////////////////////////////////////////////////
-
-
 #include "VertexBufferObject.h"
 
 // OpenGL (GLFW/GLEW)
@@ -65,6 +45,7 @@
 #include "Weapon.h"
 #include "entitygroup.h"
 #include "SpaceshipGroup.h"
+#include "MatInfo.h"
 //#include "stb_image.h"
 
 

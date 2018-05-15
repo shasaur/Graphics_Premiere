@@ -22,12 +22,11 @@
 #include "ShieldGroup.h"
 
 class Scene {
-	std::vector<Entity> entities;
+	std::vector<Entity*> entities;
 	std::vector<Projectile> pr;
 
 	glm::vec3 cameraRotation;
 	float cameraSpeed = 0.01f;
-	glm::vec3 cameraPosition;
 	glm::vec3 background;
 
 	int frame;
@@ -49,9 +48,28 @@ class Scene {
 	std::vector<btRigidBody*> bulletProjectileBodies; // so that can get at all bits
 	std::vector<btRigidBody*> StaticBits; // especially during clean up.
 
+	void UpdateCamera();
+
 public:
+	enum CameraActionType {Orbit, Lerp, Static};
+
+	struct CameraAction {
+		CameraActionType type;
+		Entity* target;
+		glm::vec3 direction;
+		float* amount;
+		float* startPoint;
+		int currentTicks;
+		int totalTicks;
+	};
+	std::vector<CameraAction> tour;
+	std::vector<CameraAction> backupTour;
+
+	glm::vec3 cameraPosition;
 	glm::vec3 cameraAngle;
 	std::vector<EntityGroup*> groups;
+
+	bool onTour;
 
 	Scene::Scene();
 	Scene::Scene(glm::vec3 cam);
@@ -61,9 +79,9 @@ public:
 
 	void Rotate(glm::vec3 rot);
 
-	void AddEntity(Entity e);
+	void AddEntity(Entity* e);
 	void AddProjectile(Projectile e);
-	void AddGroups(EntityGroup* e, int n);
+	void AddGroup(EntityGroup* e);
 	
 	void SetBackground(glm::vec3 background);
 
@@ -73,7 +91,7 @@ public:
 
 	// Bullet
 	void SetupPhysics();
-	void UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects);
+	void UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity*>* objects);
 	void UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Projectile>* objects);
 	void DestructPhysics();
 

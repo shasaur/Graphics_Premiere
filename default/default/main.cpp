@@ -12,8 +12,10 @@ std::vector<Vertex> v;
 Scene* scenes[4];
 int current_scene = 0;
 
-GLuint default_texture, mars_texture, saturn_texture, titan_texture, no_texture, space_texture;
-std::map<std::string, GLuint> texture_map;
+float speed = 0.1f;
+
+GLuint default_texture, sun_texture, mars_texture, saturn_texture, titan_texture, no_texture, space_texture;
+//std::map<std::string, GLuint> texture_map;
 
 ///*
 //Create a simple sphere
@@ -94,6 +96,102 @@ float rnd(float limit, float offset) {
 //	
 //}
 
+EntityGroup* loadModelAt(std::string base, std::string objFile, glm::vec3 p, glm::vec3 s, glm::vec3 a, bool spaceship) {
+	std::vector<tinyobj::shape_t> shapes = std::vector<tinyobj::shape_t>();
+	std::vector<tinyobj::material_t> materials = std::vector<tinyobj::material_t>();
+
+	std::map<GLuint, MatInfo> materialMap = std::map<GLuint, MatInfo>();
+
+	std::string obj_err =
+		tinyobj::LoadObj(shapes, materials, objFile.c_str(), base.c_str());
+
+	// Go through each material, map its info, and load its texture
+	for (int i = 0; i < materials.size(); i++) {
+		std::string name = materials[i].name;
+		float* colour = materials[i].diffuse;
+
+//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname.c_str());
+
+		// Load texture if one exists
+		if (materials[i].diffuse_texname != "") {
+			std::string tex_name = materials[i].diffuse_texname;
+			GLuint textId = loadTexture(std::string(base).append(tex_name).c_str());
+//texture_map.insert(std::make_pair(materials[i].diffuse_texname.c_str(), t));
+
+			materialMap.insert(std::make_pair(i, MatInfo(glm::vec3(colour[0], colour[1], colour[2]), textId, name.c_str(), tex_name.c_str())));
+		}
+		else {
+			materialMap.insert(std::make_pair(i, MatInfo(glm::vec3(colour[0], colour[1], colour[2]), 1, name.c_str(), "")));
+		}
+		
+
+		//if (materialMap.find(i) == materialMap.end())
+	}
+
+	//materials.push_back(tinyobj::material_t());
+
+	std::vector<glm::vec3> vertices = std::vector<glm::vec3>();
+	std::vector<glm::vec3> colours = std::vector<glm::vec3>();
+	std::vector<glm::vec3> normals = std::vector<glm::vec3>();
+	std::vector<GLuint> texture_ids = std::vector<GLuint>();
+	std::vector<glm::vec2> texture_coords = std::vector<glm::vec2>();
+
+	// Go through every shape that makes up the model
+	for (int i = 0; i < shapes.size(); i++) {
+		//printf("adding positions (i,max_i) = (%d,%d)\n", i, shapes.size());
+
+		// Go through every vertex
+		for (int j = 0; j < shapes[i].mesh.indices.size(); j++) {
+			//printf("adding positions (j,max_j) = (%d,%d)\n", j, shapes[i].mesh.indices.size()); //   / 100.f
+			vertices.push_back(glm::vec3(
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3] * 5.f,
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] * 5.f,
+				shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] * 5.f
+			));
+
+			int texture_index = shapes[i].mesh.material_ids[(int)floor((float)j / 3.f)];
+			//const char* texture_index_offset = materials[texture_index].diffuse_texname.c_str();
+
+			//GLuint texture_index_offset = texture_map.find(materials[texture_index].diffuse_texname.c_str())->second;
+
+			//colours.push_back();
+
+			// Assign texture to triangle
+			//printf("adding text ids\n");
+			texture_ids.push_back(texture_index);
+
+			// If this is a textured vertex
+			if (shapes[i].mesh.texcoords.size() != 0) {
+
+
+				// Assign point of texture to sample
+				//printf("adding tex_coords (%d of %d)\n", shapes[i].mesh.indices[j] * 2 + 1, shapes[i].mesh.texcoords.size());
+				texture_coords.push_back(glm::vec2(
+					shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2],
+					shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2 + 1]
+				));
+
+				//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname);
+			}
+			else {
+				// Assign texture to triangle
+				//printf("vertex is coloured, no texture\n");
+				texture_coords.push_back(glm::vec2(0.f, 0.f));
+			}
+		}
+	}
+
+	if (spaceship) {
+		SpaceshipGroup* spaceship_complex_model = new SpaceshipGroup(p, s, a, materialMap, vertices, normals, texture_ids, texture_coords);
+		return spaceship_complex_model;
+	}
+	else {
+		EntityGroup* spaceship_complex_model = new EntityGroup(p, s, a, materialMap, vertices, normals, texture_ids, texture_coords);
+		return spaceship_complex_model;
+	}
+	
+}
+
 void SetupScenes() {
 	scenes[0] = new Scene();
 
@@ -101,119 +199,67 @@ void SetupScenes() {
 	scenes[1] = new Scene();//glm::vec3(0.f, 0.f, -15.f));
 	scenes[1]->SetBackground(glm::vec3(0.1f, 0.1f, 0.1f));
 
-	Entity e2(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, saturn_texture, { 1.f, 1.f, 1.f });
-	e2.SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	// Load planets
+	Entity* sun = new Entity(Entity::Sphere, glm::vec3(-2500.f, 50.f, -5000.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, sun_texture, { 1.f, 1.f, 1.f });
+	sun->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	scenes[1]->AddEntity(sun);
+
+	Entity* e2 = new Entity(Entity::Sphere, glm::vec3(-150.f, 50.f, -250.f), glm::vec3(200.f, 200.f, 200.f), glm::vec3(0.f, 0.f, 0.f), 100, saturn_texture, { 1.f, 1.f, 1.f });
+	e2->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	scenes[1]->AddEntity(e2);
 
-	Entity e3(Entity::Sphere, glm::vec3(175.f, 50.f, -250.f), glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.f, 0.f, 0.f), 100, titan_texture, { 1.f, 1.f, 1.f });
-	e3.SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	Entity* e3 = new Entity(Entity::Sphere, glm::vec3(175.f, 50.f, -250.f), glm::vec3(10.f, 10.f, 10.f), glm::vec3(0.f, 0.f, 0.f), 100, titan_texture, { 1.f, 1.f, 1.f });
+	e3->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	scenes[1]->AddEntity(e3);
 
-
-
-	//Entity e4(Entity::Sphere, glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, false, { 0.5f, 0.5f, 1.0f });
-	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-	//scenes[1]->AddEntity(e4);
-
-	{
-		//std::vector<tinyobj::shape_t> shapes = std::vector<tinyobj::shape_t>();
-		//std::vector<tinyobj::material_t> materials = std::vector<tinyobj::material_t>();
-
-		//std::string base = "models/NeghVar/";
-		//std::string obj_err =
-		//	tinyobj::LoadObj(shapes, materials, "models/NeghVar/neghvar.obj", base.c_str());
-
-		//for (int i = 0; i < materials.size(); i++) {
-		//	printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname.c_str());
-
-		//	//Load texture
-
-		//	std::string tex_name = materials[i].diffuse_texname;
-		//	GLuint t = loadTexture(std::string(base).append(tex_name).c_str());
-		//	texture_map.insert(std::make_pair(materials[i].diffuse_texname.c_str(), t));
-		//}
-
-		////materials.push_back(tinyobj::material_t());
-
-		//std::vector<glm::vec3> vertices = std::vector<glm::vec3>();
-		//std::vector<glm::vec3> normals = std::vector<glm::vec3>();
-		//std::vector<GLuint> texture_ids = std::vector<GLuint>();
-		//std::vector<glm::vec2> texture_coords = std::vector<glm::vec2>();
-
-		//// Go through every shape that makes up the model
-		//for (int i = 0; i < shapes.size(); i++) {
-		//	printf("adding positions (i,max_i) = (%d,%d)\n", i, shapes.size());
-
-		//	// Go through every vertex
-		//	for (int j = 0; j < shapes[i].mesh.indices.size(); j++) {
-		//		printf("adding positions (j,max_j) = (%d,%d)\n", j, shapes[i].mesh.indices.size()); //   / 100.f
-		//		vertices.push_back(glm::vec3(
-		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3] * 5.f,
-		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 1] * 5.f,
-		//			shapes[i].mesh.positions[shapes[i].mesh.indices[j] * 3 + 2] * 5.f
-		//		));
-
-		//		// If this is a textured vertex
-		//		if (shapes[i].mesh.texcoords.size() != 0) {
-
-		//			// Assign texture to triangle
-		//			printf("adding text ids\n");
-		//			int texture_index = shapes[i].mesh.material_ids[(int)floor((float)j / 3.f)];
-		//			GLuint texture_index_offset = texture_map.find(materials[texture_index].diffuse_texname.c_str())->second;
-		//			texture_ids.push_back(texture_index_offset);
-
-		//			// Assign point of texture to sample
-		//			printf("adding tex_coords (%d of %d)\n", shapes[i].mesh.indices[j] * 2 + 1, shapes[i].mesh.texcoords.size());
-		//			texture_coords.push_back(glm::vec2(
-		//				shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2],
-		//				shapes[i].mesh.texcoords[shapes[i].mesh.indices[j] * 2 + 1]
-		//			));
-
-		//			//printf("material[%d].diffuse_texname = %s\n", i, materials[i].diffuse_texname);
-		//		}
-		//		else {
-		//			// Assign texture to triangle
-		//			printf("vertex is coloured, no texture\n");
-		//			texture_ids.push_back(-1);
-		//			texture_coords.push_back(glm::vec2(0.f, 0.f));
-		//		}
-		//	}
-		//}
-
-		//EntityGroup spaceship_complex_model = EntityGroup(glm::vec3(25.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
-		//scenes[1]->groups.push_back(&spaceship_complex_model);
-	}
-
-	//Entity ee(Entity::Model, glm::vec3(25.f, 0.f, -50.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords, 10);
-	////e2.SetVelocity(btVector3(rnd(6, 3), rnd(6, 3), rnd(6, 3)));
-	//scenes[1]->AddEntity(ee);
-
-
-	// Spaceship
-	//EntityGroup spaceship_model = EntityGroup(glm::vec3(25.f, 0.f, -75.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.5f, 0.f, 0.f), vertices, normals, texture_ids, texture_coords);
-	//scenes[1]->groups.push_back(spaceship_model);
+	// Load models
+	EntityGroup* complex_spaceship_model = loadModelAt("models/MyModel3/", "models/MyModel3/station.obj", 
+		glm::vec3(100.f, 40.f, -125.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f, 1.f, 1.f), false);
+	complex_spaceship_model->en.at(0).SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	scenes[1]->AddGroup(complex_spaceship_model);
 
 	// Demo spaceship
-	Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, default_texture, { 0.2f, 0.2f, 0.9f });
-	e4->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
-	//SpaceshipGroup* spaceship_model = new SpaceshipGroup(*e4);
-	scenes[1]->AddEntity(*e4);
+	//Entity* e4 = new Entity(Entity::Sphere, glm::vec3(50.f, 0.f, -125.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, default_texture, { 0.2f, 0.2f, 0.9f });
+	//e4->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	////SpaceshipGroup* spaceship_model = new SpaceshipGroup(*e4);
+	//scenes[1]->AddEntity(*e4);
 
 	// Demo enemy
-	Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, -5.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, default_texture, { 0.9f, 0.2f, 0.2f });
-	e5->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
-	SpaceshipGroup* enemy_spaceship_model = new SpaceshipGroup(*e5);
+	//Entity* e5 = new Entity(Entity::Sphere, glm::vec3(-10.f, 15.f, -2.f), glm::vec3(5.f, 5.f, 5.f), glm::vec3(0.f, 0.f, 0.f), 100, default_texture, { 0.9f, 0.2f, 0.2f });
+	//e5->SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
+	//SpaceshipGroup* enemy_spaceship_model = new SpaceshipGroup(*e5);
+	SpaceshipGroup* enemy_spaceship_model = (SpaceshipGroup*)loadModelAt("models/MyModel2/", "models/MyModel2/enemy.obj",//"models/MyModel1/", "models/MyModel1/model.obj",//"models/MyModel2/", "models/MyModel2/enemy.obj",
+		glm::vec3(-15.f, 15.f, -2.f), glm::vec3(1.f, 1.f, 1.f), glm::vec3(-3.141/2, -1.f, -1.f), true);
+	enemy_spaceship_model->en.at(0).SetVelocity(glm::vec3(0., 0., 0.), Entity::Static);
 	
 	std::vector<Weapon> enemy_weapons;
-	Weapon w1 = Weapon(glm::vec3(5.f, 0.f, 0.f), Weapon::Cannon, 0.2f);
+	Weapon w1 = Weapon(glm::vec3(-1.0f, 15.5f, 0.f), Weapon::Cannon, 0.1f);
 	enemy_weapons.push_back(w1);
 
-	enemy_spaceship_model->AddWeaponSystem(enemy_weapons, e4, scenes[1]);
+	enemy_spaceship_model->AddWeaponSystem(enemy_weapons, &complex_spaceship_model->en.at(0), scenes[1]);
 	
 	scenes[1]->groups.push_back(enemy_spaceship_model);
 
-	Entity back(Entity::Background, glm::vec3(0.f, 0.f, -40.f), glm::vec3(500.f, 500.f, 500.f), glm::vec3(0.f, 0.f, 0.f), 100, space_texture, { 1.f, 1.f, 1.f });
+	Entity* back = new Entity(Entity::Background, glm::vec3(0.f, 0.f, 0.f), glm::vec3(10000.f, 10000.f, 10000.f), glm::vec3(0.f, 5.5f, 0.f), 100, space_texture, { 1.f, 1.f, 1.f });
 	scenes[1]->AddEntity(back);
+
+
+
+	// Add camera movement
+	Scene::CameraAction a1;
+	float* mov = new float[3]{ 400.f, 0.002f, 0.f }; float* startPoint = new float[2]{ 1.5f, 0.f };
+	a1.type = Scene::Orbit; a1.target = e2; a1.direction = glm::vec3(0.f, 0.f, 0.f); a1.amount = mov; a1.startPoint = startPoint; a1.currentTicks = 0; a1.totalTicks = 1000;
+	scenes[1]->tour.push_back(a1);
+
+	Scene::CameraAction a3;
+	float* mov3 = new float[3]{ 0.f, -0.03f, 0.04f }; float* startPoint3 = new float[3]{ -10.f, -15.f, -30.f };
+	a3.type = Scene::Lerp; a3.target = nullptr; a3.direction = glm::vec3(0.0f, -0.5f, 0.f); a3.amount = mov3; a3.startPoint = startPoint3; a3.currentTicks = 0; a3.totalTicks = 1200;
+	scenes[1]->tour.push_back(a3);
+
+	Scene::CameraAction a2;
+	float* mov2 = new float[3]{ 15.f, -0.02f, 0.f }; float* startPoint2 = new float[2]{ -3.14f, 0.5f };
+	a2.type = Scene::Orbit; a2.target = &complex_spaceship_model->en.at(0); a2.direction = glm::vec3(0.2f, 4.14f, 0.f); a2.amount = mov2; a2.startPoint = startPoint2; a2.currentTicks = 0; a2.totalTicks = 800;
+	scenes[1]->tour.push_back(a2);
 }
 
 GLuint InitialiseShader(GLchar* vertex_source, GLchar* fragment_source) {
@@ -287,18 +333,35 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q) && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
-	printf("KEY PRESSED (%d, %d)\n", key, action);
+	if ((key == GLFW_KEY_P) && (action == GLFW_PRESS || action == 2) && !scenes[1]->onTour)
+		scenes[1]->cameraPosition = glm::vec3(0.f, -20.f, -20.0f);
+
+	if ((key == GLFW_KEY_DOWN) && (action == GLFW_PRESS || action == 2))
+		if (speed > 0.01f) speed -= 0.01f;
+	if ((key == GLFW_KEY_UP) && (action == GLFW_PRESS || action == 2))
+		speed += 0.01f;
+
+
 	if ((key == GLFW_KEY_LEFT) && (action == GLFW_PRESS || action == 2))
-		scenes[1]->cameraAngle.y += 0.1f;
+		scenes[1]->cameraAngle.y -= speed;
 
 	if ((key == GLFW_KEY_RIGHT) && (action == GLFW_PRESS || action == 2))
-		scenes[1]->cameraAngle.y -= 0.1f;
+		scenes[1]->cameraAngle.y += speed;
 
 	if ((key == GLFW_KEY_PAGE_UP) && (action == GLFW_PRESS || action == 2))
-		scenes[1]->cameraAngle.x -= 0.1f;
+		scenes[1]->cameraAngle.x -= speed;
 
 	if ((key == GLFW_KEY_PAGE_DOWN) && (action == GLFW_PRESS || action == 2))
-		scenes[1]->cameraAngle.x += 0.1f;
+		scenes[1]->cameraAngle.x += speed;
+
+	if ((key == GLFW_KEY_A) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->cameraPosition.x += speed;
+
+	if ((key == GLFW_KEY_D) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->cameraPosition.x -= speed;
+
+	if ((key == GLFW_KEY_T) && (action == GLFW_PRESS || action == 2))
+		scenes[1]->onTour = !scenes[1]->onTour;
 }
 
 void init() {
@@ -349,16 +412,17 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	texture_map = std::map<std::string, GLuint>();
+	//texture_map = std::map<std::string, GLuint>();
 	default_texture = loadTexture("textures/default.jpg");
-	saturn_texture = loadTexture("textures/saturn.jpg");
-	//mars_texture = loadTexture("textures/mars.jpg");
-	titan_texture = loadTexture("textures/titan.jpg");
+	sun_texture = loadTexture("textures/4k_sun.jpg");
+	saturn_texture = loadTexture("textures/4k_saturn.jpg");
+	mars_texture = loadTexture("textures/mars.jpg");
+	titan_texture = loadTexture("textures/4k_titan.jpg");
 	space_texture = loadTexture("textures/space_2.jpg");
-	texture_map.insert(std::make_pair("default", default_texture));
-	texture_map.insert(std::make_pair("saturn", saturn_texture));
-	texture_map.insert(std::make_pair("titan", titan_texture));
-	texture_map.insert(std::make_pair("space", space_texture));
+	//texture_map.insert(std::make_pair("default", default_texture));
+	//texture_map.insert(std::make_pair("saturn", saturn_texture));
+	//texture_map.insert(std::make_pair("titan", titan_texture));
+	//texture_map.insert(std::make_pair("space", space_texture));
 
 	SetupScenes();
 	SetupShaders();

@@ -2,7 +2,7 @@
 
 Scene::Scene() {
 	background = glm::vec3(0.f, 0.f, 0.f);
-	cameraPosition = glm::vec3(0.f, 0.f, -20.0f);
+	cameraPosition = glm::vec3(0.f, -20.f, -20.0f);
 	cameraRotation = glm::vec3(0.f, 0.0f, 0.f);
 	cameraAngle = glm::vec3(0.f, 0.f, 0.f);
 	cameraSpeed = 0.f;
@@ -13,6 +13,9 @@ Scene::Scene() {
 	SetupPhysics();  	// set up physics
 
 	pr = std::vector<Projectile>();
+
+	tour = std::vector<CameraAction>();
+	onTour = false;
 }
 
 //Scene::Scene(glm::vec3 cam) {
@@ -35,17 +38,17 @@ void Scene::Rotate(glm::vec3 rot) {
 	cameraRotation = rot;
 }
 
-void Scene::AddEntity(Entity e) {
+void Scene::AddEntity(Entity* e) {
 	//e.add_my_vertices(v);
 
-	e.SetupGeometry();
+	e->SetupGeometry();
 	entities.push_back(e);
 
-	if (e.moving != Entity::None) {
-		if (e.shape == Entity::Sphere)
-			bulletEntityBodies.push_back(SetSphere(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel, e.moving)); // last one is velocity
+	if (e->moving != Entity::None) {
+		if (e->shape == Entity::Sphere)
+			bulletEntityBodies.push_back(SetSphere(10.f, btTransform(btQuaternion(0, 0, 0, 1), btVector3(e->position.x, e->position.y, e->position.z)), e->vel, e->moving)); // last one is velocity
 		else
-			bulletEntityBodies.push_back(SetCube(e.size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e.position.x, e.position.y, e.position.z)), e.vel));
+			bulletEntityBodies.push_back(SetCube(e->size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e->position.x, e->position.y, e->position.z)), e->vel));
 	}
 	else
 		bulletEntityBodies.push_back(nullptr);
@@ -69,9 +72,20 @@ void Scene::AddProjectile(Projectile e) {
 //	}
 //}
 
-void Scene::AddGroups(EntityGroup* e, int n) {
-	for (int i = 0; i < n; i++) {
-		groups.push_back(&e[i]);
+void Scene::AddGroup(EntityGroup* eg) {
+	groups.push_back(eg);
+	for (int i = 0; i < eg->en.size(); i++) {
+		Entity* e = &eg->en.at(i);
+		if (e->moving != Entity::None) {
+			//if (e->shape == Entity::Sphere)
+			bulletEntityBodies.push_back(SetSphere(10.f, btTransform(btQuaternion(0, 0, 0, 1), btVector3(e->position.x, e->position.y, e->position.z)), e->vel, e->moving)); // last one is velocity
+			//else
+			//	bulletEntityBodies.push_back(SetCube(e->size[0], btTransform(btQuaternion(0, 0, 0, 1), btVector3(e->position.x, e->position.y, e->position.z)), e->vel));
+		}
+		else
+			bulletEntityBodies.push_back(nullptr);
+
+		entities.push_back(nullptr);
 	}
 }
 
@@ -85,7 +99,9 @@ void Scene::FreeGeometry() {
 	}
 
 	for (int i = 0; i < entities.size(); i++) {
-		entities[i].FreeGeometry();
+		if (entities.at(i) != nullptr) {
+			entities[i]->FreeGeometry();
+		}
 	}
 
 	for (int i = 0; i < pr.size(); i++) {
@@ -124,7 +140,7 @@ void Scene::SetupPhysics() {
 	printf("Setup Bullet\n");
 }
 
-void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>* objects) {
+void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity*>* objects) {
 	for (int i = 0; i < bodies.size(); i++) {
 		if (bodies.at(i) != nullptr) {
 			btTransform trans;
@@ -143,9 +159,11 @@ void Scene::UpdatePhysics(std::vector<btRigidBody*> bodies, std::vector<Entity>*
 			//glm::mat4 btMat = glm::mat4(trans)
 			//btMat.getRotation(trans.getRotation())
 
-			objects->at(i).position = position;
-			objects->at(i).angle = an;
-			objects->at(i).theta = theta;
+			if (objects->at(i) != nullptr) {
+				objects->at(i)->position = position;
+				objects->at(i)->angle = an;
+				objects->at(i)->theta = theta;
+			}
 		}
 	}
 }
@@ -359,7 +377,10 @@ void Scene::DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 Vie
 
 
 	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "mvpmatrix"), 1, GL_FALSE, glm::value_ptr(MVP));
-	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "modelmatrix"), 1, GL_FALSE, glm::value_ptr(Angle));
+	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "modelmatrix"), 1, GL_FALSE, glm::value_ptr(Model));
+	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "viewmatrix"), 1, GL_FALSE, glm::value_ptr(View));
+	glUniformMatrix4fv(glGetUniformLocation(shaderprogram, "anglematrix"), 1, GL_FALSE, glm::value_ptr(Angle));
+	glUniform3f(glGetUniformLocation(shaderprogram, "camerapos"), cameraPosition.x, cameraPosition.y, cameraPosition.z);
 	glUniform1i(glGetUniformLocation(shaderprogram, "text"), 1);
 
 	if (e.textured) {
@@ -379,18 +400,114 @@ void Scene::DrawEntity(GLuint shaderprogram, glm::mat4 Projection, glm::mat4 Vie
 	}
 }
 
+glm::vec3 ConvertToCartesian(float* angles, float r) {
+	float x = r * sin(angles[0]) * cos(angles[1]);
+	float y = r * sin(angles[0]) * sin(angles[1]);
+	float z = r * cos(angles[0]);
+	return glm::vec3(x, y, z);
+}
+
+float* ConvertToPolar(glm::vec3 coords) {
+	float x = coords.x;
+	float y = coords.y;
+	float z = coords.z;
+	float r = sqrt(x * x + y * y + z * z);
+	float* polars = new float[3]{ 
+		r, 
+		(x / sqrt(x * x + y * y)) * (y < 0 ? -1 : 1),
+		acos(z / r) };
+	return polars;
+}
+
+void Scene::UpdateCamera() {
+	if (onTour) {
+
+		if (tour.size() > 0) {
+			CameraAction* currentAction = &tour.at(0);
+
+			if (currentAction->currentTicks < currentAction->totalTicks) {
+				switch (currentAction->type) {
+				case Orbit: {
+					if (currentAction->direction.x == -1.f) {
+
+					}
+					else {
+						cameraAngle.x = currentAction->direction.x;
+						cameraAngle.y = currentAction->direction.y;
+						cameraAngle.z = currentAction->direction.z;
+					}
+
+					float* polars = new float[2]{
+						currentAction->amount[1] * currentAction->currentTicks + currentAction->startPoint[0],
+						currentAction->amount[2] * currentAction->currentTicks + currentAction->startPoint[1]
+					};
+
+					//float* newPolars = new float[2]{ polars[1],polars[2] };
+					glm::vec3 newPos = ConvertToCartesian(polars, currentAction->amount[0]);
+					cameraPosition.x = newPos.x - currentAction->target->position.x;
+					cameraPosition.y = newPos.y - currentAction->target->position.y;
+					cameraPosition.z = newPos.z - currentAction->target->position.z;
+
+					currentAction->currentTicks += 1;
+
+				} break;
+				case Lerp: {
+					if (currentAction->direction.x == -1.f) {
+
+					}
+					else {
+						cameraAngle.x = currentAction->direction.x;
+						cameraAngle.y = currentAction->direction.y;
+						cameraAngle.z = currentAction->direction.z;
+					}
+
+					cameraPosition.x = (currentAction->amount[0] * currentAction->currentTicks) + currentAction->startPoint[0];
+					cameraPosition.y = (currentAction->amount[1] * currentAction->currentTicks) + currentAction->startPoint[1];
+					cameraPosition.z = (currentAction->amount[2] * currentAction->currentTicks) + currentAction->startPoint[2];
+
+					currentAction->currentTicks += 1;
+
+				} break;
+				case Static: {
+
+				}
+				default:
+					printf("Warning, no such camera action exists!");
+				}
+			}
+			else {
+				tour.at(0).currentTicks = 0;
+				backupTour.push_back(tour.at(0));
+
+				tour.erase(tour.begin());
+			}
+		}
+		// If reached the end of the tour
+		else {
+			onTour = false;
+
+			// reset queue
+			tour = backupTour;
+			backupTour = std::vector<CameraAction>();
+		}
+	}
+}
+
 void Scene::Render(GLuint shaderprogram, GLuint vao) {
+	cameraAngle[0] += cameraRotation.x;
+	cameraAngle[1] += cameraRotation.y;
+	cameraAngle[2] += cameraRotation.z;
+
+	UpdateCamera();
+
 	GLfloat angle;
-	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 1000.0f);
+	glm::mat4 Projection = glm::perspective(glm::radians(45.0f), (float)SCREEN_WIDTH/(float)SCREEN_HEIGHT, 0.1f, 100000.0f);
 	GLfloat t = glfwGetTime();
 	GLfloat p = 400.f;
 	t = fmod(t, p);
 	angle = t * 360.f / p;
 	//glm::mat4 View = glm::mat4(1.f);
 
-	cameraAngle[0] += cameraRotation.x;
-	cameraAngle[1] += cameraRotation.y;
-	cameraAngle[2] += cameraRotation.z;
 
 	//View = glm::translate(View, cameraPosition);
 	//View = glm::rotate(View, cameraAngle.x, glm::vec3(1.f, 0.f, 0.f));
@@ -403,7 +520,7 @@ void Scene::Render(GLuint shaderprogram, GLuint vao) {
 	r = glm::rotate(r, cameraAngle.y, glm::vec3(0, 1, 0));
 	r = glm::rotate(r, cameraAngle.z, glm::vec3(0, 0, 1));
 
-	glm::mat4 View = glm::translate(glm::mat4(1.), cameraPosition) * r;// *r;
+	glm::mat4 View = r * glm::translate(glm::mat4(1.), cameraPosition);// *r;
 
 
 	/* Bind our modelmatrix variable to be a uniform called mvpmatrix in our shaderprogram */
@@ -427,7 +544,9 @@ void Scene::Render(GLuint shaderprogram, GLuint vao) {
 	}
 
 	for (int i = 0; i < entities.size(); i++) {
-		DrawEntity(shaderprogram, Projection, View, entities.at(i));
+		if (entities.at(i) != nullptr) {
+			DrawEntity(shaderprogram, Projection, View, *entities.at(i));
+		}
 	}
 
 	for (int i = 0; i < pr.size(); i++) {
